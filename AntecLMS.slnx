@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AntecLMS.API/AntecLMS.API.csproj" />
+    <Project Path="src/AntecLMS.Application/AntecLMS.Application.csproj" />
+    <Project Path="src/AntecLMS.Domain/AntecLMS.Domain.csproj" />
+    <Project Path="src/AntecLMS.Infrastructure/AntecLMS.Infrastructure.csproj" />
+  </Folder>
+</Solution>
