@@ -41,7 +41,7 @@ public class CourseRepository : BaseRepository<Course>, ICourseRepository
 
   public async Task<bool> HasActiveGroupsAsync(int courseId, CancellationToken ct = default) =>
     await _context.Groups.AnyAsync(
-      g => g.CourseId == courseId && g.Status == GroupStatus.Active && g.DeletedAt == null,
+      g => g.CourseId == courseId && g.Status == GroupStatus.Active,
       ct
     );
 }

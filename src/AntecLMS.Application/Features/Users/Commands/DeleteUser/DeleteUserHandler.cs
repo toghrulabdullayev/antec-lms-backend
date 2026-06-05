@@ -30,8 +30,7 @@ public class DeleteUserHandler : IRequestHandler<DeleteUserCommand, Result>
         return Result.Failure("Bu istifadəçinin aktiv qrupları var, silinə bilməz.", 400);
     }
 
-    user.SoftDelete();
-    _users.Update(user);
+    _users.Remove(user);
     await _uow.SaveChangesAsync(ct);
 
     return Result.Success();

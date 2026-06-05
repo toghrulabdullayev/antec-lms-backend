@@ -8,6 +8,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
   public void Configure(EntityTypeBuilder<User> builder)
   {
+    builder.ToTable("users");
     builder.HasKey(u => u.Id);
 
     builder.Property(u => u.Name).IsRequired().HasMaxLength(100);
@@ -19,7 +20,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     builder.Property(u => u.Status).HasConversion<string>();
 
     builder.HasIndex(u => u.Email).IsUnique();
-    builder.HasQueryFilter(u => u.DeletedAt == null);
 
     builder
       .HasOne(u => u.TeacherProfile)

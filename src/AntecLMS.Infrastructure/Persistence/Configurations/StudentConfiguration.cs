@@ -8,9 +8,9 @@ public class StudentConfiguration : IEntityTypeConfiguration<Student>
 {
   public void Configure(EntityTypeBuilder<Student> builder)
   {
+    builder.ToTable("students");
     builder.HasKey(s => s.Id);
     builder.Property(s => s.Note).HasMaxLength(500);
     builder.Property(s => s.Status).HasConversion<string>();
-    builder.HasQueryFilter(s => s.DeletedAt == null);
   }
 }

@@ -25,9 +25,6 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
     if (user is null || !_hasher.Verify(request.Password, user.Password))
       return Result<LoginResponse>.Failure("Email və ya şifrə yanlışdır.", 401);
 
-    if (user.IsDeleted)
-      return Result<LoginResponse>.Failure("Hesab mövcud deyil.", 401);
-
     var token = _jwt.GenerateToken(user);
 
     var response = new LoginResponse(

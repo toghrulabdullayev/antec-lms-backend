@@ -27,8 +27,7 @@ public class DeleteTeacherHandler : IRequestHandler<DeleteTeacherCommand, Result
     if (await _groups.HasActiveGroupsForTeacherAsync(request.Id, ct))
       return Result.Failure("Bu müəllimin aktiv qrupları var, silinə bilməz.", 400);
 
-    teacher.SoftDelete();
-    _teachers.Update(teacher);
+    _teachers.Remove(teacher);
     await _uow.SaveChangesAsync(ct);
 
     return Result.Success();

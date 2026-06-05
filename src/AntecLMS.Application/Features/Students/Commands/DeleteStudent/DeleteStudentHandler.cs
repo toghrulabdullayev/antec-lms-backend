@@ -22,8 +22,7 @@ public class DeleteStudentHandler : IRequestHandler<DeleteStudentCommand, Result
       await _students.GetByIdAsync(request.Id, ct)
       ?? throw new NotFoundException("Student", request.Id);
 
-    student.SoftDelete();
-    _students.Update(student);
+    _students.Remove(student);
     await _uow.SaveChangesAsync(ct);
 
     return Result.Success();

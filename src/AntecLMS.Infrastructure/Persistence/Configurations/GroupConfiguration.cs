@@ -8,10 +8,10 @@ public class GroupConfiguration : IEntityTypeConfiguration<Group>
 {
   public void Configure(EntityTypeBuilder<Group> builder)
   {
+    builder.ToTable("groups");
     builder.HasKey(g => g.Id);
     builder.Property(g => g.Name).IsRequired().HasMaxLength(200);
     builder.Property(g => g.Status).HasConversion<string>();
-    builder.HasQueryFilter(g => g.DeletedAt == null);
 
     builder
       .HasOne(g => g.Course)

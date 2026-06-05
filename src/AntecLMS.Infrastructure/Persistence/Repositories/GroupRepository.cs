@@ -77,9 +77,5 @@ public class GroupRepository : BaseRepository<Group>, IGroupRepository
   public async Task<bool> HasActiveGroupsForTeacherAsync(
     int teacherId,
     CancellationToken ct = default
-  ) =>
-    await _set.AnyAsync(
-      g => g.TeacherId == teacherId && g.Status == GroupStatus.Active && g.DeletedAt == null,
-      ct
-    );
+  ) => await _set.AnyAsync(g => g.TeacherId == teacherId && g.Status == GroupStatus.Active, ct);
 }

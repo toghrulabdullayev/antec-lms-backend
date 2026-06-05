@@ -20,7 +20,7 @@ public static class DependencyInjection
   )
   {
     services.AddDbContext<AppDbContext>(options =>
-      options.UseNpgsql(config.GetConnectionString("Default"))
+      options.UseNpgsql(config.GetConnectionString("Default")).UseSnakeCaseNamingConvention()
     );
 
     services.AddScoped<IUserRepository, UserRepository>();

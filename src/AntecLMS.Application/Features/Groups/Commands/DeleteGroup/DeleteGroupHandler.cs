@@ -22,8 +22,7 @@ public class DeleteGroupHandler : IRequestHandler<DeleteGroupCommand, Result>
       await _groups.GetByIdAsync(request.Id, ct)
       ?? throw new NotFoundException("Group", request.Id);
 
-    group.SoftDelete();
-    _groups.Update(group);
+    _groups.Remove(group);
     await _uow.SaveChangesAsync(ct);
 
     return Result.Success();

@@ -27,7 +27,7 @@ public class GetCourseByIdHandler
         course.Name,
         course.Description,
         course.Status.ToString().ToLower(),
-        course.Groups.Count(g => !g.IsDeleted),
+        course.Groups.Count,
         course.CreatedAt
       )
     );

@@ -21,10 +21,7 @@ public class GetTeacherByIdHandler
       await _teachers.GetWithUserAsync(request.Id, ct)
       ?? throw new NotFoundException("Teacher", request.Id);
 
-    var groups = teacher
-      .Groups.Where(g => !g.IsDeleted)
-      .Select(g => new GroupRef(g.Id, g.Name))
-      .ToList();
+    var groups = teacher.Groups.Select(g => new GroupRef(g.Id, g.Name)).ToList();
 
     return Result<TeacherDetailResponse>.Success(
       new TeacherDetailResponse(

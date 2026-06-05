@@ -8,6 +8,7 @@ public class GroupStudentConfiguration : IEntityTypeConfiguration<GroupStudent>
 {
   public void Configure(EntityTypeBuilder<GroupStudent> builder)
   {
+    builder.ToTable("group_students");
     builder.HasKey(gs => new { gs.GroupId, gs.StudentId });
 
     builder.HasOne(gs => gs.Group).WithMany(g => g.GroupStudents).HasForeignKey(gs => gs.GroupId);

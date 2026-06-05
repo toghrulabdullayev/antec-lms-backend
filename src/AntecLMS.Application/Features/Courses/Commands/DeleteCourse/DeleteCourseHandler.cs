@@ -25,8 +25,7 @@ public class DeleteCourseHandler : IRequestHandler<DeleteCourseCommand, Result>
     if (await _courses.HasActiveGroupsAsync(request.Id, ct))
       return Result.Failure("Bu kursla bağlı aktiv qruplar var, silinə bilməz.", 400);
 
-    course.SoftDelete();
-    _courses.Update(course);
+    _courses.Remove(course);
     await _uow.SaveChangesAsync(ct);
 
     return Result.Success();
