@@ -1,0 +1,25 @@
+The real one:
+Host=172.17.78.50;Port=5432;Database=zoho;Username=testuser2;Password=TestUser2!
+
+Add a migration:
+dotnet ef migrations add AddSomething \
+  --project src/AntecLMS.Infrastructure \
+  --startup-project src/AntecLMS.API
+
+Update database with migrations:
+dotnet ef database update \
+  --project src/AntecLMS.Infrastructure \
+  --startup-project src/AntecLMS.API
+
+Database shell:
+docker exec -it antec-postgres psql -U antec -d anteclms
+
+Logs:
+docker logs antec-postgres
+
+Stop:
+docker compose down
+docker compose down -v (deletes the volume too, wipes data)
+
+Run backend:
+dotnet run --project src/AntecLMS.API
