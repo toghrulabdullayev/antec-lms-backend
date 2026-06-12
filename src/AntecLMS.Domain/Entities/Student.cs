@@ -13,6 +13,8 @@ public class Student : BaseEntity
   // Nav
   public User User { get; set; } = default!;
   public ICollection<GroupStudent> GroupStudents { get; set; } = new List<GroupStudent>();
+  public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
+  public ICollection<Grade> Grades { get; set; } = new List<Grade>();
 
   protected Student() { }
 

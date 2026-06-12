@@ -12,5 +12,6 @@ public interface IBaseRepository<T>
   Task AddAsync(T entity, CancellationToken ct = default);
   void Update(T entity);
   void Remove(T entity);
+  IQueryable<T> GetAll();
   Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null, CancellationToken ct = default);
 }

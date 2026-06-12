@@ -28,13 +28,19 @@ public class UpdateCourseHandler
       ?? throw new NotFoundException("Course", request.Id);
 
     var status = Enum.Parse<CourseStatus>(request.Status, true);
-    course.Update(request.Name, request.Description, status);
+    course.Update(request.Name, request.Description, request.Price, request.ImageUrl, status);
 
     _courses.Update(course);
     await _uow.SaveChangesAsync(ct);
 
     return Result<UpdatedCourseResponse>.Success(
-      new UpdatedCourseResponse(course.Id, course.Name, course.Status.ToString().ToLower())
+      new UpdatedCourseResponse(
+        course.Id,
+        course.Name,
+        course.Price,
+        course.ImageUrl,
+        course.Status.ToString().ToLower()
+      )
     );
   }
 }

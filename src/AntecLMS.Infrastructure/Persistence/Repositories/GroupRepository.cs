@@ -57,7 +57,7 @@ public class GroupRepository : BaseRepository<Group>, IGroupRepository
     CancellationToken ct = default
   ) =>
     await _context.GroupStudents.AnyAsync(
-      gs => gs.GroupId == groupId && gs.StudentId == studentId && gs.IsActive,
+      gs => gs.GroupId == groupId && gs.StudentId == studentId && gs.Status == UserStatus.Active,
       ct
     );
 
@@ -73,6 +73,12 @@ public class GroupRepository : BaseRepository<Group>, IGroupRepository
       gs => gs.GroupId == groupId && gs.StudentId == studentId,
       ct
     );
+
+  public async Task<List<Group>> GetByTeacherAsync(int teacherId, CancellationToken ct = default) =>
+    await _set.Include(g => g.Course)
+      .Where(g => g.TeacherId == teacherId)
+      .OrderByDescending(g => g.CreatedAt)
+      .ToListAsync(ct);
 
   public async Task<bool> HasActiveGroupsForTeacherAsync(
     int teacherId,

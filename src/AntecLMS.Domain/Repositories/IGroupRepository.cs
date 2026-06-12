@@ -22,4 +22,5 @@ public interface IGroupRepository : IBaseRepository<Group>
     CancellationToken ct = default
   );
   Task<bool> HasActiveGroupsForTeacherAsync(int teacherId, CancellationToken ct = default);
+  Task<List<Group>> GetByTeacherAsync(int teacherId, CancellationToken ct = default);
 }

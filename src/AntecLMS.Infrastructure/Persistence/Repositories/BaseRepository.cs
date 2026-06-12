@@ -20,6 +20,8 @@ public class BaseRepository<T> : IBaseRepository<T>
   public virtual async Task<T?> GetByIdAsync(int id, CancellationToken ct = default) =>
     await _set.FirstOrDefaultAsync(e => e.Id == id, ct);
 
+  public IQueryable<T> GetAll() => _set;
+
   public async Task<List<T>> GetAllAsync(CancellationToken ct = default) =>
     await _set.ToListAsync(ct);
 

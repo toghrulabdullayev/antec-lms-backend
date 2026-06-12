@@ -9,6 +9,8 @@ public record CourseDetailResponse(
   int Id,
   string Name,
   string? Description,
+  decimal Price,
+  string? ImageUrl,
   string Status,
   int GroupsCount,
   DateTime CreatedAt

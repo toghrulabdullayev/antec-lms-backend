@@ -26,6 +26,8 @@ public class GetCourseByIdHandler
         course.Id,
         course.Name,
         course.Description,
+        course.Price,
+        course.ImageUrl,
         course.Status.ToString().ToLower(),
         course.Groups.Count,
         course.CreatedAt

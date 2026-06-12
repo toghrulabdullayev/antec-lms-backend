@@ -35,7 +35,7 @@ public class GetGroupsHandler : IRequestHandler<GetGroupsQuery, Result<PagedResu
         g.Name,
         new CourseRef(g.Course.Id, g.Course.Name),
         new TeacherRef(g.Teacher.Id, g.Teacher.User.Name, g.Teacher.User.Surname),
-        g.GroupStudents.Count(gs => gs.IsActive),
+        g.GroupStudents.Count(gs => gs.Status == UserStatus.Active),
         g.StartDate,
         g.EndDate,
         g.Status.ToString().ToLower()

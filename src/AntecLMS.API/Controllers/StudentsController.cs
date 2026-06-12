@@ -1,3 +1,5 @@
+using AntecLMS.Application.Features.Attendances.Queries.GetStudentAttendances;
+using AntecLMS.Application.Features.Grades.Queries.GetStudentGrades;
 using AntecLMS.Application.Features.Students.Commands.CreateStudent;
 using AntecLMS.Application.Features.Students.Commands.DeleteStudent;
 using AntecLMS.Application.Features.Students.Commands.UpdateStudent;
@@ -71,6 +73,26 @@ public class StudentsController : BaseApiController
     if (!result.IsSuccess)
       return ToResponse(result);
     return Ok(new { message = "Tələbə uğurla silindi." });
+  }
+
+  // --- Student attendance history (read-only, use LessonsController for CRUD) ---
+
+  [HttpGet("{studentId:int}/attendances")]
+  [Authorize(Roles = "Admin,Teacher")]
+  public async Task<IActionResult> GetAttendances(int studentId, CancellationToken ct)
+  {
+    var result = await Mediator.Send(new GetStudentAttendancesQuery(studentId), ct);
+    return ToResponse(result);
+  }
+
+  // --- Student grade history (read-only, use LessonsController for CRUD) ---
+
+  [HttpGet("{studentId:int}/grades")]
+  [Authorize(Roles = "Admin,Teacher")]
+  public async Task<IActionResult> GetGrades(int studentId, CancellationToken ct)
+  {
+    var result = await Mediator.Send(new GetStudentGradesQuery(studentId), ct);
+    return ToResponse(result);
   }
 }
 

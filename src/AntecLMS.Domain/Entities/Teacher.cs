@@ -13,6 +13,8 @@ public class Teacher : BaseEntity
   // Nav
   public User User { get; set; } = default!;
   public ICollection<Group> Groups { get; set; } = new List<Group>();
+  public ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
+  public ICollection<Material> Materials { get; set; } = new List<Material>();
 
   protected Teacher() { }
 

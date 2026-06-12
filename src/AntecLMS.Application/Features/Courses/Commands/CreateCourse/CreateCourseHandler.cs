@@ -23,7 +23,13 @@ public class CreateCourseHandler : IRequestHandler<CreateCourseCommand, Result<C
   )
   {
     var status = Enum.Parse<CourseStatus>(request.Status, true);
-    var course = Course.Create(request.Name, request.Description, status);
+    var course = Course.Create(
+      request.Name,
+      request.Description,
+      request.Price,
+      request.ImageUrl,
+      status
+    );
 
     await _courses.AddAsync(course, ct);
     await _uow.SaveChangesAsync(ct);
@@ -33,6 +39,8 @@ public class CreateCourseHandler : IRequestHandler<CreateCourseCommand, Result<C
         course.Id,
         course.Name,
         course.Description,
+        course.Price,
+        course.ImageUrl,
         course.Status.ToString().ToLower(),
         course.CreatedAt
       ),

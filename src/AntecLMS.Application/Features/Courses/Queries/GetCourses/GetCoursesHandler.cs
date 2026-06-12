@@ -34,6 +34,8 @@ public class GetCoursesHandler
         c.Id,
         c.Name,
         c.Description,
+        c.Price,
+        c.ImageUrl,
         c.Status.ToString().ToLower(),
         c.CreatedAt
       ))

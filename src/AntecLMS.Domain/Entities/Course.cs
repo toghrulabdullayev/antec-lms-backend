@@ -7,6 +7,8 @@ public class Course : BaseEntity
 {
   public string Name { get; private set; } = default!;
   public string? Description { get; private set; }
+  public decimal Price { get; private set; }
+  public string? ImageUrl { get; private set; }
   public CourseStatus Status { get; private set; }
 
   // Nav
@@ -14,18 +16,34 @@ public class Course : BaseEntity
 
   protected Course() { }
 
-  public static Course Create(string name, string? description, CourseStatus status) =>
+  public static Course Create(
+    string name,
+    string? description,
+    decimal price,
+    string? imageUrl,
+    CourseStatus status
+  ) =>
     new()
     {
       Name = name,
       Description = description,
+      Price = price,
+      ImageUrl = imageUrl,
       Status = status,
     };
 
-  public void Update(string name, string? description, CourseStatus status)
+  public void Update(
+    string name,
+    string? description,
+    decimal price,
+    string? imageUrl,
+    CourseStatus status
+  )
   {
     Name = name;
     Description = description;
+    Price = price;
+    ImageUrl = imageUrl;
     Status = status;
     MarkUpdated();
   }

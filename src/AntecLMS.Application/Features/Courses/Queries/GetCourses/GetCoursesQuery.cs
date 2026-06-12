@@ -10,6 +10,8 @@ public record CourseListItem(
   int Id,
   string Name,
   string? Description,
+  decimal Price,
+  string? ImageUrl,
   string Status,
   DateTime CreatedAt
 );

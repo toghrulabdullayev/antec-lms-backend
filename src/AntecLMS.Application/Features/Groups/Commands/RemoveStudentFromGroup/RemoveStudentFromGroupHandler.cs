@@ -1,4 +1,5 @@
 using AntecLMS.Application.Common.Models;
+using AntecLMS.Domain.Enums;
 using AntecLMS.Domain.Repositories;
 using MediatR;
 
@@ -21,7 +22,7 @@ public class RemoveStudentFromGroupHandler : IRequestHandler<RemoveStudentFromGr
     if (gs is null)
       return Result.Failure("Tələbə bu qrupda deyil.", 404);
 
-    gs.IsActive = false;
+    gs.Status = UserStatus.Inactive;
     await _uow.SaveChangesAsync(ct);
 
     return Result.Success();

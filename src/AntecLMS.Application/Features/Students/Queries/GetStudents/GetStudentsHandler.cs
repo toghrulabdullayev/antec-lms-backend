@@ -40,7 +40,7 @@ public class GetStudentsHandler
         s.User.Phone,
         s.BirthDate,
         s.Status.ToString().ToLower(),
-        s.GroupStudents.Where(gs => gs.IsActive)
+        s.GroupStudents.Where(gs => gs.Status == UserStatus.Active)
           .Select(gs => new GroupRefS(gs.Group.Id, gs.Group.Name))
           .ToList()
       ))

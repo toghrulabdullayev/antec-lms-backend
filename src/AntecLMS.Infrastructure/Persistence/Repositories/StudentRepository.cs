@@ -32,7 +32,7 @@ public class StudentRepository : BaseRepository<Student>, IStudentRepository
 
     if (groupId.HasValue)
       query = query.Where(s =>
-        s.GroupStudents.Any(gs => gs.GroupId == groupId.Value && gs.IsActive)
+        s.GroupStudents.Any(gs => gs.GroupId == groupId.Value && gs.Status == UserStatus.Active)
       );
 
     if (status.HasValue)

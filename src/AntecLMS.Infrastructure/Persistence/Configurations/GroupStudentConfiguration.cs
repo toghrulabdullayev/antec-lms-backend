@@ -9,7 +9,8 @@ public class GroupStudentConfiguration : IEntityTypeConfiguration<GroupStudent>
   public void Configure(EntityTypeBuilder<GroupStudent> builder)
   {
     builder.ToTable("group_students");
-    builder.HasKey(gs => new { gs.GroupId, gs.StudentId });
+    builder.HasKey(gs => gs.Id);
+    builder.Property(gs => gs.Status).HasConversion<string>().HasMaxLength(50);
 
     builder.HasOne(gs => gs.Group).WithMany(g => g.GroupStudents).HasForeignKey(gs => gs.GroupId);
 
@@ -17,5 +18,7 @@ public class GroupStudentConfiguration : IEntityTypeConfiguration<GroupStudent>
       .HasOne(gs => gs.Student)
       .WithMany(s => s.GroupStudents)
       .HasForeignKey(gs => gs.StudentId);
+
+    builder.HasIndex(gs => new { gs.GroupId, gs.StudentId }).IsUnique();
   }
 }

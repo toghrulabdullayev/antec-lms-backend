@@ -1,5 +1,6 @@
 using AntecLMS.Application.Common.Models;
 using AntecLMS.Domain.Entities;
+using AntecLMS.Domain.Enums;
 using AntecLMS.Domain.Repositories;
 using MediatR;
 
@@ -44,7 +45,7 @@ public class AddStudentToGroupHandler
       GroupId = request.GroupId,
       StudentId = request.StudentId,
       JoinedAt = DateTime.UtcNow,
-      IsActive = true,
+      Status = UserStatus.Active,
     };
 
     await _groups.AddStudentAsync(gs, ct);

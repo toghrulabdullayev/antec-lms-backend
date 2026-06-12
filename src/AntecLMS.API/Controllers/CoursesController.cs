@@ -53,7 +53,14 @@ public class CoursesController : BaseApiController
   )
   {
     var result = await Mediator.Send(
-      new UpdateCourseCommand(id, request.Name, request.Description, request.Status),
+      new UpdateCourseCommand(
+        id,
+        request.Name,
+        request.Description,
+        request.Price,
+        request.ImageUrl,
+        request.Status
+      ),
       ct
     );
     if (!result.IsSuccess)
@@ -72,4 +79,10 @@ public class CoursesController : BaseApiController
   }
 }
 
-public record UpdateCourseRequest(string Name, string? Description, string Status);
+public record UpdateCourseRequest(
+  string Name,
+  string? Description,
+  decimal Price,
+  string? ImageUrl,
+  string Status
+);

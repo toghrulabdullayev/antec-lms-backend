@@ -1,5 +1,6 @@
 using AntecLMS.Application.Common.Exceptions;
 using AntecLMS.Application.Common.Models;
+using AntecLMS.Domain.Enums;
 using AntecLMS.Domain.Repositories;
 using MediatR;
 
@@ -22,7 +23,7 @@ public class GetStudentByIdHandler
       ?? throw new NotFoundException("Student", request.Id);
 
     var groups = student
-      .GroupStudents.Where(gs => gs.IsActive)
+      .GroupStudents.Where(gs => gs.Status == UserStatus.Active)
       .Select(gs => new GroupRefD(gs.Group.Id, gs.Group.Name))
       .ToList();
 

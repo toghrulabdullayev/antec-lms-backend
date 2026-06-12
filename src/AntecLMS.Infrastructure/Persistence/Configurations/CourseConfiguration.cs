@@ -12,6 +12,8 @@ public class CourseConfiguration : IEntityTypeConfiguration<Course>
     builder.HasKey(c => c.Id);
     builder.Property(c => c.Name).IsRequired().HasMaxLength(200);
     builder.Property(c => c.Description).HasMaxLength(1000);
+    builder.Property(c => c.Price).HasColumnType("decimal(18,2)");
+    builder.Property(c => c.ImageUrl).HasMaxLength(500);
     builder.Property(c => c.Status).HasConversion<string>();
   }
 }
