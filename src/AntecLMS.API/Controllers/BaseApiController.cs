@@ -1,5 +1,4 @@
 using AntecLMS.Application.Common.Models;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AntecLMS.API.Controllers;
@@ -8,11 +7,6 @@ namespace AntecLMS.API.Controllers;
 [Route("api/[controller]")]
 public abstract class BaseApiController : ControllerBase
 {
-  private ISender? _mediator;
-
-  protected ISender Mediator =>
-    _mediator ??= HttpContext.RequestServices.GetRequiredService<ISender>();
-
   protected IActionResult ToResponse<T>(Result<T> result)
   {
     if (!result.IsSuccess)

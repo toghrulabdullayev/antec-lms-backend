@@ -1,16 +1,5 @@
-using AntecLMS.Application.Features.Attendances.Commands.CreateAttendance;
-using AntecLMS.Application.Features.Attendances.Commands.DeleteAttendance;
-using AntecLMS.Application.Features.Attendances.Commands.UpdateAttendance;
-using AntecLMS.Application.Features.Attendances.Queries.GetLessonAttendances;
-using AntecLMS.Application.Features.Grades.Commands.CreateGrade;
-using AntecLMS.Application.Features.Grades.Commands.DeleteGrade;
-using AntecLMS.Application.Features.Grades.Commands.UpdateGrade;
-using AntecLMS.Application.Features.Grades.Queries.GetLessonGrades;
-using AntecLMS.Application.Features.Lessons.Commands.CreateLesson;
-using AntecLMS.Application.Features.Lessons.Commands.DeleteLesson;
-using AntecLMS.Application.Features.Lessons.Commands.UpdateLesson;
-using AntecLMS.Application.Features.Lessons.Queries.GetGroupLessons;
-using AntecLMS.Application.Features.Lessons.Queries.GetLessonById;
+using AntecLMS.Application.DTOs;
+using AntecLMS.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,27 +8,39 @@ namespace AntecLMS.API.Controllers;
 [Authorize(Roles = "Admin,Teacher")]
 public class LessonsController : BaseApiController
 {
+  private readonly ILessonService _lessons;
+  private readonly IAttendanceService _attendances;
+  private readonly IGradeService _grades;
+
+  public LessonsController(
+    ILessonService lessons,
+    IAttendanceService attendances,
+    IGradeService grades
+  )
+  {
+    _lessons = lessons;
+    _attendances = attendances;
+    _grades = grades;
+  }
+
   [HttpGet("group/{groupId:int}")]
   public async Task<IActionResult> GetByGroup(int groupId, CancellationToken ct)
   {
-    var result = await Mediator.Send(new GetGroupLessonsQuery(groupId), ct);
+    var result = await _lessons.GetByGroupAsync(groupId, ct);
     return ToResponse(result);
   }
 
   [HttpGet("{id:int}")]
   public async Task<IActionResult> GetById(int id, CancellationToken ct)
   {
-    var result = await Mediator.Send(new GetLessonByIdQuery(id), ct);
+    var result = await _lessons.GetByIdAsync(id, ct);
     return ToResponse(result);
   }
 
   [HttpPost]
-  public async Task<IActionResult> Create(
-    [FromBody] CreateLessonCommand command,
-    CancellationToken ct
-  )
+  public async Task<IActionResult> Create([FromBody] CreateLessonDto dto, CancellationToken ct)
   {
-    var result = await Mediator.Send(command, ct);
+    var result = await _lessons.CreateAsync(dto, ct);
     if (!result.IsSuccess)
       return ToResponse(result);
     return StatusCode(201, new { message = "Dərs uğurla yaradıldı.", data = result.Data });
@@ -48,14 +49,11 @@ public class LessonsController : BaseApiController
   [HttpPut("{id:int}")]
   public async Task<IActionResult> Update(
     int id,
-    [FromBody] UpdateLessonRequest request,
+    [FromBody] UpdateLessonDto dto,
     CancellationToken ct
   )
   {
-    var result = await Mediator.Send(
-      new UpdateLessonCommand(id, request.LessonDate, request.Topic, request.Note, request.Status),
-      ct
-    );
+    var result = await _lessons.UpdateAsync(id, dto, ct);
     if (!result.IsSuccess)
       return ToResponse(result);
     return Ok(new { message = "Dərs uğurla yeniləndi.", data = result.Data });
@@ -64,7 +62,7 @@ public class LessonsController : BaseApiController
   [HttpDelete("{id:int}")]
   public async Task<IActionResult> Delete(int id, CancellationToken ct)
   {
-    var result = await Mediator.Send(new DeleteLessonCommand(id), ct);
+    var result = await _lessons.DeleteAsync(id, ct);
     if (!result.IsSuccess)
       return ToResponse(result);
     return Ok(new { message = "Dərs uğurla silindi." });
@@ -75,28 +73,18 @@ public class LessonsController : BaseApiController
   [HttpGet("{lessonId:int}/attendances")]
   public async Task<IActionResult> GetAttendances(int lessonId, CancellationToken ct)
   {
-    var result = await Mediator.Send(new GetLessonAttendancesQuery(lessonId), ct);
+    var result = await _attendances.GetByLessonAsync(lessonId, ct);
     return ToResponse(result);
   }
 
   [HttpPost("{lessonId:int}/attendances")]
   public async Task<IActionResult> CreateAttendance(
     int lessonId,
-    [FromBody] CreateAttendanceRequest request,
+    [FromBody] CreateAttendanceDto dto,
     CancellationToken ct
   )
   {
-    var result = await Mediator.Send(
-      new CreateAttendanceCommand(
-        lessonId,
-        request.StudentId,
-        request.Status,
-        request.MinutesLate,
-        request.Reason,
-        request.TeacherNote
-      ),
-      ct
-    );
+    var result = await _attendances.CreateAsync(lessonId, dto, ct);
     if (!result.IsSuccess)
       return ToResponse(result);
     return StatusCode(201, new { message = "Davamiyyət qeyd edildi.", data = result.Data });
@@ -105,20 +93,11 @@ public class LessonsController : BaseApiController
   [HttpPut("attendances/{attendanceId:int}")]
   public async Task<IActionResult> UpdateAttendance(
     int attendanceId,
-    [FromBody] UpdateAttendanceRequest request,
+    [FromBody] UpdateAttendanceDto dto,
     CancellationToken ct
   )
   {
-    var result = await Mediator.Send(
-      new UpdateAttendanceCommand(
-        attendanceId,
-        request.Status,
-        request.MinutesLate,
-        request.Reason,
-        request.TeacherNote
-      ),
-      ct
-    );
+    var result = await _attendances.UpdateAsync(attendanceId, dto, ct);
     if (!result.IsSuccess)
       return ToResponse(result);
     return Ok(new { message = "Davamiyyət yeniləndi.", data = result.Data });
@@ -127,7 +106,7 @@ public class LessonsController : BaseApiController
   [HttpDelete("attendances/{attendanceId:int}")]
   public async Task<IActionResult> DeleteAttendance(int attendanceId, CancellationToken ct)
   {
-    var result = await Mediator.Send(new DeleteAttendanceCommand(attendanceId), ct);
+    var result = await _attendances.DeleteAsync(attendanceId, ct);
     if (!result.IsSuccess)
       return ToResponse(result);
     return Ok(new { message = "Davamiyyət silindi." });
@@ -138,27 +117,18 @@ public class LessonsController : BaseApiController
   [HttpGet("{lessonId:int}/grades")]
   public async Task<IActionResult> GetGrades(int lessonId, CancellationToken ct)
   {
-    var result = await Mediator.Send(new GetLessonGradesQuery(lessonId), ct);
+    var result = await _grades.GetByLessonAsync(lessonId, ct);
     return ToResponse(result);
   }
 
   [HttpPost("{lessonId:int}/grades")]
   public async Task<IActionResult> CreateGrade(
     int lessonId,
-    [FromBody] CreateGradeRequest request,
+    [FromBody] CreateGradeDto dto,
     CancellationToken ct
   )
   {
-    var result = await Mediator.Send(
-      new CreateGradeCommand(
-        lessonId,
-        request.StudentId,
-        request.Score,
-        request.MaxScore,
-        request.TeacherNote
-      ),
-      ct
-    );
+    var result = await _grades.CreateAsync(lessonId, dto, ct);
     if (!result.IsSuccess)
       return ToResponse(result);
     return StatusCode(201, new { message = "Qiymət qeyd edildi.", data = result.Data });
@@ -167,14 +137,11 @@ public class LessonsController : BaseApiController
   [HttpPut("grades/{gradeId:int}")]
   public async Task<IActionResult> UpdateGrade(
     int gradeId,
-    [FromBody] UpdateGradeRequest request,
+    [FromBody] UpdateGradeDto dto,
     CancellationToken ct
   )
   {
-    var result = await Mediator.Send(
-      new UpdateGradeCommand(gradeId, request.Score, request.MaxScore, request.TeacherNote),
-      ct
-    );
+    var result = await _grades.UpdateAsync(gradeId, dto, ct);
     if (!result.IsSuccess)
       return ToResponse(result);
     return Ok(new { message = "Qiymət yeniləndi.", data = result.Data });
@@ -183,35 +150,9 @@ public class LessonsController : BaseApiController
   [HttpDelete("grades/{gradeId:int}")]
   public async Task<IActionResult> DeleteGrade(int gradeId, CancellationToken ct)
   {
-    var result = await Mediator.Send(new DeleteGradeCommand(gradeId), ct);
+    var result = await _grades.DeleteAsync(gradeId, ct);
     if (!result.IsSuccess)
       return ToResponse(result);
     return Ok(new { message = "Qiymət silindi." });
   }
 }
-
-public record UpdateLessonRequest(
-  DateTime? LessonDate,
-  string? Topic,
-  string? Note,
-  string? Status
-);
-
-public record CreateAttendanceRequest(
-  int StudentId,
-  string Status,
-  int? MinutesLate,
-  string? Reason,
-  string? TeacherNote
-);
-
-public record UpdateAttendanceRequest(
-  string Status,
-  int? MinutesLate,
-  string? Reason,
-  string? TeacherNote
-);
-
-public record CreateGradeRequest(int StudentId, int Score, int MaxScore, string? TeacherNote);
-
-public record UpdateGradeRequest(int Score, int MaxScore, string? TeacherNote);

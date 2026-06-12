@@ -1,8 +1,5 @@
-using AntecLMS.Application.Features.Courses.Commands.CreateCourse;
-using AntecLMS.Application.Features.Courses.Commands.DeleteCourse;
-using AntecLMS.Application.Features.Courses.Commands.UpdateCourse;
-using AntecLMS.Application.Features.Courses.Queries.GetCourseById;
-using AntecLMS.Application.Features.Courses.Queries.GetCourses;
+using AntecLMS.Application.DTOs;
+using AntecLMS.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +8,13 @@ namespace AntecLMS.API.Controllers;
 [Authorize]
 public class CoursesController : BaseApiController
 {
+  private readonly ICourseService _courses;
+
+  public CoursesController(ICourseService courses)
+  {
+    _courses = courses;
+  }
+
   [HttpGet]
   public async Task<IActionResult> GetAll(
     [FromQuery] string? status,
@@ -20,25 +24,22 @@ public class CoursesController : BaseApiController
     CancellationToken ct = default
   )
   {
-    var result = await Mediator.Send(new GetCoursesQuery(status, search, page, perPage), ct);
+    var result = await _courses.GetAllAsync(status, search, page, perPage, ct);
     return ToResponse(result);
   }
 
   [HttpGet("{id:int}")]
   public async Task<IActionResult> GetById(int id, CancellationToken ct)
   {
-    var result = await Mediator.Send(new GetCourseByIdQuery(id), ct);
+    var result = await _courses.GetByIdAsync(id, ct);
     return ToResponse(result);
   }
 
   [HttpPost]
   [Authorize(Roles = "Admin")]
-  public async Task<IActionResult> Create(
-    [FromBody] CreateCourseCommand command,
-    CancellationToken ct
-  )
+  public async Task<IActionResult> Create([FromBody] CreateCourseDto dto, CancellationToken ct)
   {
-    var result = await Mediator.Send(command, ct);
+    var result = await _courses.CreateAsync(dto, ct);
     if (!result.IsSuccess)
       return ToResponse(result);
     return StatusCode(201, new { message = "Kurs uğurla yaradıldı.", data = result.Data });
@@ -48,21 +49,11 @@ public class CoursesController : BaseApiController
   [Authorize(Roles = "Admin")]
   public async Task<IActionResult> Update(
     int id,
-    [FromBody] UpdateCourseRequest request,
+    [FromBody] UpdateCourseDto dto,
     CancellationToken ct
   )
   {
-    var result = await Mediator.Send(
-      new UpdateCourseCommand(
-        id,
-        request.Name,
-        request.Description,
-        request.Price,
-        request.ImageUrl,
-        request.Status
-      ),
-      ct
-    );
+    var result = await _courses.UpdateAsync(id, dto, ct);
     if (!result.IsSuccess)
       return ToResponse(result);
     return Ok(new { message = "Kurs uğurla yeniləndi.", data = result.Data });
@@ -72,17 +63,9 @@ public class CoursesController : BaseApiController
   [Authorize(Roles = "Admin")]
   public async Task<IActionResult> Delete(int id, CancellationToken ct)
   {
-    var result = await Mediator.Send(new DeleteCourseCommand(id), ct);
+    var result = await _courses.DeleteAsync(id, ct);
     if (!result.IsSuccess)
       return ToResponse(result);
     return Ok(new { message = "Kurs uğurla silindi." });
   }
 }
-
-public record UpdateCourseRequest(
-  string Name,
-  string? Description,
-  decimal Price,
-  string? ImageUrl,
-  string Status
-);

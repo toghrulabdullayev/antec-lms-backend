@@ -1,8 +1,5 @@
-using AntecLMS.Application.Features.Users.Commands.CreateUser;
-using AntecLMS.Application.Features.Users.Commands.DeleteUser;
-using AntecLMS.Application.Features.Users.Commands.UpdateUser;
-using AntecLMS.Application.Features.Users.Queries.GetUserById;
-using AntecLMS.Application.Features.Users.Queries.GetUsers;
+using AntecLMS.Application.DTOs;
+using AntecLMS.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +8,13 @@ namespace AntecLMS.API.Controllers;
 [Authorize(Roles = "Admin")]
 public class UsersController : BaseApiController
 {
+  private readonly IUserService _users;
+
+  public UsersController(IUserService users)
+  {
+    _users = users;
+  }
+
   [HttpGet]
   public async Task<IActionResult> GetAll(
     [FromQuery] string? role,
@@ -21,39 +25,32 @@ public class UsersController : BaseApiController
     CancellationToken ct = default
   )
   {
-    var result = await Mediator.Send(new GetUsersQuery(role, status, search, page, perPage), ct);
+    var result = await _users.GetAllAsync(role, status, search, page, perPage, ct);
     return ToResponse(result);
   }
 
   [HttpGet("{id:int}")]
   public async Task<IActionResult> GetById(int id, CancellationToken ct)
   {
-    var result = await Mediator.Send(new GetUserByIdQuery(id), ct);
+    var result = await _users.GetByIdAsync(id, ct);
     return ToResponse(result);
   }
 
   [HttpPost]
-  public async Task<IActionResult> Create(
-    [FromBody] CreateUserCommand command,
-    CancellationToken ct
-  )
+  public async Task<IActionResult> Create([FromBody] CreateUserDto dto, CancellationToken ct)
   {
-    var result = await Mediator.Send(command, ct);
+    var result = await _users.CreateAsync(dto, ct);
     return ToResponse(result);
   }
 
   [HttpPut("{id:int}")]
   public async Task<IActionResult> Update(
     int id,
-    [FromBody] UpdateUserRequest request,
+    [FromBody] UpdateUserDto dto,
     CancellationToken ct
   )
   {
-    var result = await Mediator.Send(
-      new UpdateUserCommand(id, request.Name, request.Surname, request.Phone, request.Status),
-      ct
-    );
-
+    var result = await _users.UpdateAsync(id, dto, ct);
     if (!result.IsSuccess)
       return ToResponse(result);
     return Ok(new { message = "İstifadəçi uğurla yeniləndi.", data = result.Data });
@@ -62,11 +59,9 @@ public class UsersController : BaseApiController
   [HttpDelete("{id:int}")]
   public async Task<IActionResult> Delete(int id, CancellationToken ct)
   {
-    var result = await Mediator.Send(new DeleteUserCommand(id), ct);
+    var result = await _users.DeleteAsync(id, ct);
     if (!result.IsSuccess)
       return ToResponse(result);
     return Ok(new { message = "İstifadəçi uğurla silindi." });
   }
 }
-
-public record UpdateUserRequest(string Name, string Surname, string? Phone, string Status);

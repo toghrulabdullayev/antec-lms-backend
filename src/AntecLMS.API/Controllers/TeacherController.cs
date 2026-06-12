@@ -1,16 +1,57 @@
-using AntecLMS.Application.Features.TeacherDashboard.Queries.GetTeacherDashboard;
+using AntecLMS.Application.DTOs;
+using AntecLMS.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AntecLMS.API.Controllers;
 
 [Authorize(Roles = "Teacher")]
-public class TeacherController : BaseApiController
+public class TeacherController(ITeacherService teachers, ITeacherDashboardService dashboard)
+  : BaseApiController
 {
   [HttpGet("dashboard/{teacherId:int}")]
   public async Task<IActionResult> Dashboard(int teacherId, CancellationToken ct)
   {
-    var result = await Mediator.Send(new GetTeacherDashboardQuery(teacherId), ct);
+    var result = await dashboard.GetAsync(teacherId, ct);
+    return ToResponse(result);
+  }
+
+  [HttpGet]
+  public async Task<IActionResult> GetAll(
+    [FromQuery] int page = 1,
+    [FromQuery] int perPage = 10,
+    CancellationToken ct = default
+  )
+  {
+    var result = await teachers.GetAllAsync(page, perPage, ct);
+    return ToResponse(result);
+  }
+
+  [HttpGet("{id:int}")]
+  public async Task<IActionResult> GetById(int id, CancellationToken ct)
+  {
+    var result = await teachers.GetByIdAsync(id, ct);
+    return ToResponse(result);
+  }
+
+  [HttpPost]
+  public async Task<IActionResult> Create(CreateTeacherDto dto, CancellationToken ct)
+  {
+    var result = await teachers.CreateAsync(dto, ct);
+    return ToResponse(result);
+  }
+
+  [HttpPut("{id:int}")]
+  public async Task<IActionResult> Update(int id, UpdateTeacherDto dto, CancellationToken ct)
+  {
+    var result = await teachers.UpdateAsync(id, dto, ct);
+    return ToResponse(result);
+  }
+
+  [HttpDelete("{id:int}")]
+  public async Task<IActionResult> Delete(int id, CancellationToken ct)
+  {
+    var result = await teachers.DeleteAsync(id, ct);
     return ToResponse(result);
   }
 }

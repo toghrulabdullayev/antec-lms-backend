@@ -1,8 +1,5 @@
-using AntecLMS.Application.Features.Teachers.Commands.CreateTeacher;
-using AntecLMS.Application.Features.Teachers.Commands.DeleteTeacher;
-using AntecLMS.Application.Features.Teachers.Commands.UpdateTeacher;
-using AntecLMS.Application.Features.Teachers.Queries.GetTeacherById;
-using AntecLMS.Application.Features.Teachers.Queries.GetTeachers;
+using AntecLMS.Application.DTOs;
+using AntecLMS.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +8,13 @@ namespace AntecLMS.API.Controllers;
 [Authorize(Roles = "Admin")]
 public class TeachersController : BaseApiController
 {
+  private readonly ITeacherService _teachers;
+
+  public TeachersController(ITeacherService teachers)
+  {
+    _teachers = teachers;
+  }
+
   [HttpGet]
   public async Task<IActionResult> GetAll(
     [FromQuery] int page = 1,
@@ -18,24 +22,21 @@ public class TeachersController : BaseApiController
     CancellationToken ct = default
   )
   {
-    var result = await Mediator.Send(new GetTeachersQuery(page, perPage), ct);
+    var result = await _teachers.GetAllAsync(page, perPage, ct);
     return ToResponse(result);
   }
 
   [HttpGet("{id:int}")]
   public async Task<IActionResult> GetById(int id, CancellationToken ct)
   {
-    var result = await Mediator.Send(new GetTeacherByIdQuery(id), ct);
+    var result = await _teachers.GetByIdAsync(id, ct);
     return ToResponse(result);
   }
 
   [HttpPost]
-  public async Task<IActionResult> Create(
-    [FromBody] CreateTeacherCommand command,
-    CancellationToken ct
-  )
+  public async Task<IActionResult> Create([FromBody] CreateTeacherDto dto, CancellationToken ct)
   {
-    var result = await Mediator.Send(command, ct);
+    var result = await _teachers.CreateAsync(dto, ct);
     if (!result.IsSuccess)
       return ToResponse(result);
     return StatusCode(201, new { message = "Müəllim uğurla yaradıldı.", data = result.Data });
@@ -44,14 +45,11 @@ public class TeachersController : BaseApiController
   [HttpPut("{id:int}")]
   public async Task<IActionResult> Update(
     int id,
-    [FromBody] UpdateTeacherRequest request,
+    [FromBody] UpdateTeacherDto dto,
     CancellationToken ct
   )
   {
-    var result = await Mediator.Send(
-      new UpdateTeacherCommand(id, request.Phone, request.Specialization, request.Status),
-      ct
-    );
+    var result = await _teachers.UpdateAsync(id, dto, ct);
     if (!result.IsSuccess)
       return ToResponse(result);
     return Ok(new { message = "Müəllim məlumatları uğurla yeniləndi.", data = result.Data });
@@ -60,11 +58,9 @@ public class TeachersController : BaseApiController
   [HttpDelete("{id:int}")]
   public async Task<IActionResult> Delete(int id, CancellationToken ct)
   {
-    var result = await Mediator.Send(new DeleteTeacherCommand(id), ct);
+    var result = await _teachers.DeleteAsync(id, ct);
     if (!result.IsSuccess)
       return ToResponse(result);
     return Ok(new { message = "Müəllim uğurla silindi." });
   }
 }
-
-public record UpdateTeacherRequest(string? Phone, string? Specialization, string Status);
