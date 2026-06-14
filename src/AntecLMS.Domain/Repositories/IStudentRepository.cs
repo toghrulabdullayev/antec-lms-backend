@@ -5,6 +5,7 @@ namespace AntecLMS.Domain.Repositories;
 
 public interface IStudentRepository : IBaseRepository<Student>
 {
+  Task<Student?> GetByUserIdAsync(int userId, CancellationToken ct = default);
   Task<Student?> GetWithUserAsync(int id, CancellationToken ct = default);
   Task<(List<Student> Items, int Total)> GetPagedAsync(
     int? groupId,

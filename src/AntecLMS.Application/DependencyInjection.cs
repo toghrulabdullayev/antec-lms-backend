@@ -20,6 +20,7 @@ public static class DependencyInjection
     services.AddScoped<IDashboardService, DashboardService>();
     services.AddScoped<ITeacherDashboardService, TeacherDashboardService>();
     services.AddScoped<IReportService, ReportService>();
+    services.AddScoped<IStudentPortalService, StudentPortalService>();
 
     return services;
   }

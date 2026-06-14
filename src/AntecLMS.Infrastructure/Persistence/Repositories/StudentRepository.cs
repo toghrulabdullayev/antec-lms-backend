@@ -10,6 +10,12 @@ public class StudentRepository : BaseRepository<Student>, IStudentRepository
   public StudentRepository(AppDbContext context)
     : base(context) { }
 
+  public async Task<Student?> GetByUserIdAsync(int userId, CancellationToken ct = default) =>
+    await _set.Include(s => s.User)
+      .Include(s => s.GroupStudents)
+        .ThenInclude(gs => gs.Group)
+      .FirstOrDefaultAsync(s => s.UserId == userId, ct);
+
   public async Task<Student?> GetWithUserAsync(int id, CancellationToken ct = default) =>
     await _set.Include(s => s.User)
       .Include(s => s.GroupStudents)

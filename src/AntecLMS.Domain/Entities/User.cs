@@ -55,4 +55,10 @@ public class User : BaseEntity
     Status = status;
     MarkUpdated();
   }
+
+  public void ChangePassword(string hashedPassword)
+  {
+    Password = hashedPassword;
+    MarkUpdated();
+  }
 }

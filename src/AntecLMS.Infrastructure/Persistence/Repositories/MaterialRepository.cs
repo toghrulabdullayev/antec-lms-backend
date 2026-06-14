@@ -19,4 +19,13 @@ public class MaterialRepository : BaseRepository<Material>, IMaterialRepository
     await _set.Where(m => m.LessonId == lessonId)
       .OrderByDescending(m => m.CreatedAt)
       .ToListAsync(ct);
+
+  public async Task<List<Material>> GetByStudentUserIdAsync(
+    int userId,
+    CancellationToken ct = default
+  ) =>
+    await _set.Include(m => m.Lesson)
+      .Where(m => m.Group.GroupStudents.Any(gs => gs.Student.UserId == userId))
+      .OrderByDescending(m => m.CreatedAt)
+      .ToListAsync(ct);
 }
