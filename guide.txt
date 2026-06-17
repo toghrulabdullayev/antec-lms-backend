@@ -23,3 +23,5 @@ docker compose down -v (deletes the volume too, wipes data)
 
 Run backend:
 dotnet run --project src/AntecLMS.API
+
+vagif contributed here
