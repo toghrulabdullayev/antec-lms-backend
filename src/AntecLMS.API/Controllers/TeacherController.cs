@@ -73,7 +73,10 @@ public class TeacherController(
   )
   {
     var result = await teachers.ChangePasswordAsync(
-      currentUser.UserId, request.CurrentPassword, request.NewPassword, ct
+      currentUser.UserId,
+      request.CurrentPassword,
+      request.NewPassword,
+      ct
     );
     return ToResponse(result);
   }

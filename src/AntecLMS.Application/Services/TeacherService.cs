@@ -92,7 +92,10 @@ public class TeacherService : ITeacherService
     );
   }
 
-  public async Task<Result<TeacherDetailResponse>> GetMyProfileAsync(int userId, CancellationToken ct)
+  public async Task<Result<TeacherDetailResponse>> GetMyProfileAsync(
+    int userId,
+    CancellationToken ct
+  )
   {
     var teacher = await _teachers
       .GetAll()

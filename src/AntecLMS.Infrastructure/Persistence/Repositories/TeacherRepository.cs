@@ -13,7 +13,9 @@ public class TeacherRepository : BaseRepository<Teacher>, ITeacherRepository
     await _set.Include(t => t.User).Include(t => t.Groups).FirstOrDefaultAsync(t => t.Id == id, ct);
 
   public async Task<Teacher?> GetByUserIdAsync(int userId, CancellationToken ct = default) =>
-    await _set.Include(t => t.User).Include(t => t.Groups).FirstOrDefaultAsync(t => t.UserId == userId, ct);
+    await _set.Include(t => t.User)
+      .Include(t => t.Groups)
+      .FirstOrDefaultAsync(t => t.UserId == userId, ct);
 
   public async Task<(List<Teacher> Items, int Total)> GetPagedAsync(
     int page,
