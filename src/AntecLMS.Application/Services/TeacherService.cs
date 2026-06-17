@@ -92,6 +92,35 @@ public class TeacherService : ITeacherService
     );
   }
 
+  public async Task<Result<TeacherDetailResponse>> GetMyProfileAsync(int userId, CancellationToken ct)
+  {
+    var teacher = await _teachers
+      .GetAll()
+      .Include(t => t.User)
+      .Include(t => t.Groups)
+      .FirstOrDefaultAsync(t => t.UserId == userId, ct);
+
+    if (teacher is null)
+      return Result<TeacherDetailResponse>.Failure("Müəllim tapılmadı", 404);
+
+    var groups = teacher.Groups.Select(g => new GroupRefT(g.Id, g.Name)).ToList();
+
+    return Result<TeacherDetailResponse>.Success(
+      new TeacherDetailResponse(
+        teacher.Id,
+        teacher.UserId,
+        teacher.User.Name,
+        teacher.User.Surname,
+        teacher.User.Email,
+        teacher.User.Phone,
+        teacher.Specialization,
+        teacher.Bio,
+        teacher.Status.ToString().ToLower(),
+        groups
+      )
+    );
+  }
+
   public async Task<Result<TeacherResponse>> CreateAsync(CreateTeacherDto dto, CancellationToken ct)
   {
     if (await _users.EmailExistsAsync(dto.Email, ct))
@@ -173,6 +202,26 @@ public class TeacherService : ITeacherService
       return Result.Failure("Bu müəllimin aktiv qrupları var, silinə bilməz.", 400);
 
     _teachers.Remove(teacher);
+    await _uow.SaveChangesAsync(ct);
+    return Result.Success();
+  }
+
+  public async Task<Result> ChangePasswordAsync(
+    int userId,
+    string currentPassword,
+    string newPassword,
+    CancellationToken ct
+  )
+  {
+    var user = await _users.GetByIdAsync(userId, ct);
+    if (user is null)
+      return Result.Failure("İstifadəçi tapılmadı", 404);
+
+    if (!_hasher.Verify(currentPassword, user.Password))
+      return Result.Failure("Mövcud şifrə yanlışdır", 400);
+
+    user.ChangePassword(_hasher.Hash(newPassword));
+    _users.Update(user);
     await _uow.SaveChangesAsync(ct);
     return Result.Success();
   }

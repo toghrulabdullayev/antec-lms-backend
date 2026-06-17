@@ -10,4 +10,5 @@ public interface ITeacherRepository : IBaseRepository<Teacher>
     int perPage,
     CancellationToken ct = default
   );
+  Task<Teacher?> GetByUserIdAsync(int userId, CancellationToken ct = default);
 }

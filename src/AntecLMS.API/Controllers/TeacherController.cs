@@ -1,3 +1,4 @@
+using AntecLMS.Application.Common.Interfaces;
 using AntecLMS.Application.DTOs;
 using AntecLMS.Application.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -6,9 +7,19 @@ using Microsoft.AspNetCore.Mvc;
 namespace AntecLMS.API.Controllers;
 
 [Authorize(Roles = "Teacher")]
-public class TeacherController(ITeacherService teachers, ITeacherDashboardService dashboard)
-  : BaseApiController
+public class TeacherController(
+  ITeacherService teachers,
+  ITeacherDashboardService dashboard,
+  ICurrentUserService currentUser
+) : BaseApiController
 {
+  [HttpGet("me")]
+  public async Task<IActionResult> GetMe(CancellationToken ct)
+  {
+    var result = await teachers.GetMyProfileAsync(currentUser.UserId, ct);
+    return ToResponse(result);
+  }
+
   [HttpGet("dashboard/{teacherId:int}")]
   public async Task<IActionResult> Dashboard(int teacherId, CancellationToken ct)
   {
@@ -52,6 +63,18 @@ public class TeacherController(ITeacherService teachers, ITeacherDashboardServic
   public async Task<IActionResult> Delete(int id, CancellationToken ct)
   {
     var result = await teachers.DeleteAsync(id, ct);
+    return ToResponse(result);
+  }
+
+  [HttpPut("change-password")]
+  public async Task<IActionResult> ChangePassword(
+    [FromBody] ChangePasswordRequest request,
+    CancellationToken ct
+  )
+  {
+    var result = await teachers.ChangePasswordAsync(
+      currentUser.UserId, request.CurrentPassword, request.NewPassword, ct
+    );
     return ToResponse(result);
   }
 }
