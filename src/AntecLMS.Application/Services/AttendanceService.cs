@@ -42,7 +42,7 @@ public class AttendanceService : IAttendanceService
         a.Id,
         a.StudentId,
         $"{a.Student?.User?.Name} {a.Student?.User?.Surname}",
-        a.Status.ToString().ToLower(),
+        a.Status.ToApiString(),
         a.MinutesLate,
         a.Reason,
         a.TeacherNote,
@@ -70,7 +70,7 @@ public class AttendanceService : IAttendanceService
         a.LessonId,
         a.Lesson?.Topic,
         a.Lesson.LessonDate,
-        a.Status.ToString().ToLower(),
+        a.Status.ToApiString(),
         a.MinutesLate,
         a.Reason,
         a.TeacherNote,
@@ -93,7 +93,14 @@ public class AttendanceService : IAttendanceService
       await _students.GetByIdAsync(dto.StudentId, ct)
       ?? throw new NotFoundException("Student", dto.StudentId);
 
-    var status = Enum.Parse<AttendanceStatus>(dto.Status, true);
+    var status = dto.Status switch
+    {
+        "present" => AttendanceStatus.Present,
+        "late" => AttendanceStatus.Late,
+        "absent_excused" => AttendanceStatus.AbsentExcused,
+        "absent_unexcused" => AttendanceStatus.AbsentUnexcused,
+        _ => throw new ArgumentException($"Invalid status: {dto.Status}")
+    };
     var attendance = Attendance.Create(
       lessonId,
       dto.StudentId,
@@ -111,7 +118,7 @@ public class AttendanceService : IAttendanceService
         attendance.Id,
         attendance.LessonId,
         attendance.StudentId,
-        attendance.Status.ToString().ToLower(),
+        attendance.Status.ToApiString(),
         attendance.MinutesLate,
         attendance.Reason,
         attendance.TeacherNote,
@@ -130,7 +137,14 @@ public class AttendanceService : IAttendanceService
     var attendance =
       await _attendances.GetByIdAsync(id, ct) ?? throw new NotFoundException("Attendance", id);
 
-    var status = Enum.Parse<AttendanceStatus>(dto.Status, true);
+    var status = dto.Status switch
+    {
+        "present" => AttendanceStatus.Present,
+        "late" => AttendanceStatus.Late,
+        "absent_excused" => AttendanceStatus.AbsentExcused,
+        "absent_unexcused" => AttendanceStatus.AbsentUnexcused,
+        _ => throw new ArgumentException($"Invalid status: {dto.Status}")
+    };
     attendance.Update(status, dto.MinutesLate, dto.Reason, dto.TeacherNote);
 
     _attendances.Update(attendance);
@@ -141,7 +155,7 @@ public class AttendanceService : IAttendanceService
         attendance.Id,
         attendance.LessonId,
         attendance.StudentId,
-        attendance.Status.ToString().ToLower(),
+        attendance.Status.ToApiString(),
         attendance.MinutesLate,
         attendance.Reason,
         attendance.TeacherNote,

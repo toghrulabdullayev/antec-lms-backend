@@ -90,7 +90,7 @@ public class LessonService : ILessonService
           a.Id,
           a.StudentId,
           $"{a.Student?.User?.Name} {a.Student?.User?.Surname}",
-          a.Status.ToString().ToLower(),
+          a.Status.ToApiString(),
           a.MinutesLate,
           a.Reason
         ))

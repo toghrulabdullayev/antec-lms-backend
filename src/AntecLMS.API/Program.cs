@@ -5,6 +5,7 @@ using AntecLMS.Infrastructure;
 using AntecLMS.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,7 @@ builder
   .AddJsonOptions(options =>
   {
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
   });
 builder.Services.AddEndpointsApiExplorer();
 

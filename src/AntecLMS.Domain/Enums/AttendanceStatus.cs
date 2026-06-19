@@ -1,9 +1,19 @@
+using System.Text.Json.Serialization;
+
 namespace AntecLMS.Domain.Enums;
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum AttendanceStatus
 {
-  Present,
-  Absent,
-  Late,
-  Excused,
+    [JsonPropertyName("present")]
+    Present,
+
+    [JsonPropertyName("late")]
+    Late,
+
+    [JsonPropertyName("absent_excused")]
+    AbsentExcused,
+
+    [JsonPropertyName("absent_unexcused")]
+    AbsentUnexcused,
 }
