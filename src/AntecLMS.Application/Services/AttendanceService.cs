@@ -85,13 +85,10 @@ public class AttendanceService : IAttendanceService
     int lessonId,
     CreateAttendanceDto dto,
     CancellationToken ct
-  )
-  {
-    _ =
-      await _lessons.GetByIdAsync(lessonId, ct) ?? throw new NotFoundException("Lesson", lessonId);
-    _ =
-      await _students.GetByIdAsync(dto.StudentId, ct)
-      ?? throw new NotFoundException("Student", dto.StudentId);
+)
+{
+    _ = await _lessons.GetByIdAsync(lessonId, ct) ?? throw new NotFoundException("Lesson", lessonId);
+    _ = await _students.GetByIdAsync(dto.StudentId, ct) ?? throw new NotFoundException("Student", dto.StudentId);
 
     var status = dto.Status switch
     {
@@ -101,32 +98,38 @@ public class AttendanceService : IAttendanceService
         "absent_unexcused" => AttendanceStatus.AbsentUnexcused,
         _ => throw new ArgumentException($"Invalid status: {dto.Status}")
     };
-    var attendance = Attendance.Create(
-      lessonId,
-      dto.StudentId,
-      status,
-      dto.MinutesLate,
-      dto.Reason,
-      dto.TeacherNote
-    );
 
-    await _attendances.AddAsync(attendance, ct);
+    var existing = await _attendances.GetByLessonAndStudentAsync(lessonId, dto.StudentId, ct);
+
+    if (existing != null)
+    {
+        existing.Update(status, dto.MinutesLate, dto.Reason, dto.TeacherNote);
+        _attendances.Update(existing);
+    }
+    else
+    {
+        var attendance = Attendance.Create(lessonId, dto.StudentId, status, dto.MinutesLate, dto.Reason, dto.TeacherNote);
+        await _attendances.AddAsync(attendance, ct);
+    }
+
     await _uow.SaveChangesAsync(ct);
 
+    var result = existing ?? await _attendances.GetByLessonAndStudentAsync(lessonId, dto.StudentId, ct);
+
     return Result<AttendanceResponse>.Success(
-      new AttendanceResponse(
-        attendance.Id,
-        attendance.LessonId,
-        attendance.StudentId,
-        attendance.Status.ToApiString(),
-        attendance.MinutesLate,
-        attendance.Reason,
-        attendance.TeacherNote,
-        attendance.CreatedAt
-      ),
-      201
+        new AttendanceResponse(
+            result!.Id,
+            result.LessonId,
+            result.StudentId,
+            result.Status.ToApiString(),
+            result.MinutesLate,
+            result.Reason,
+            result.TeacherNote,
+            result.CreatedAt
+        ),
+        201
     );
-  }
+}
 
   public async Task<Result<AttendanceResponse>> UpdateAsync(
     int id,

@@ -26,4 +26,12 @@ public class AttendanceRepository : BaseRepository<Attendance>, IAttendanceRepos
       .Where(a => a.StudentId == studentId)
       .OrderByDescending(a => a.CreatedAt)
       .ToListAsync(ct);
+
+  public async Task<Attendance?> GetByLessonAndStudentAsync(
+    int lessonId,
+    int studentId,
+    CancellationToken ct = default
+) =>
+    await _set
+        .FirstOrDefaultAsync(a => a.LessonId == lessonId && a.StudentId == studentId, ct);
 }
