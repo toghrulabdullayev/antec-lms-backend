@@ -64,7 +64,7 @@ public class ReportService : IReportService
         g.Count(a => a.Status == AttendanceStatus.AbsentUnexcused),
         g.Count(a => a.Status == AttendanceStatus.Late),
         g.Count(a => a.Status == AttendanceStatus.AbsentExcused),
-        Math.Round((double)g.Count(a => a.Status != AttendanceStatus.AbsentUnexcused) / g.Count() * 100, 1)
+        Math.Round((double)g.Count(a => a.Status == AttendanceStatus.Present || a.Status == AttendanceStatus.Late) / g.Count() * 100, 1)
       ))
       .ToList();
 
@@ -82,7 +82,7 @@ public class ReportService : IReportService
         absent,
         late,
         excused,
-        total > 0 ? Math.Round((double)(total - absent) / total * 100, 1) : 0,
+        total > 0 ? Math.Round((double)(total - absent - excused) / total * 100, 1) : 0,
         byStudent
       )
     );
@@ -173,7 +173,7 @@ public class ReportService : IReportService
         : null;
 
     var totalLessons = attendances.Count;
-    var attendedLessons = attendances.Count(a => a.Status != AttendanceStatus.AbsentUnexcused);
+    var attendedLessons = attendances.Count(a => a.Status == AttendanceStatus.Present || a.Status == AttendanceStatus.Late);
     var attendanceRate =
       totalLessons > 0 ? Math.Round((double)attendedLessons / totalLessons * 100, 1) : 0;
 
@@ -264,7 +264,7 @@ public class ReportService : IReportService
           absent,
           late,
           excused,
-          totalLes > 0 ? Math.Round((double)(totalLes - absent) / totalLes * 100, 1) : 0
+          totalLes > 0 ? Math.Round((double)(totalLes - absent - excused) / totalLes * 100, 1) : 0
         );
       })
       .ToList();
@@ -274,8 +274,8 @@ public class ReportService : IReportService
     var atRiskCount = byStudent.Count(g =>
     {
       var total = g.Count();
-      var absent = g.Count(a => a.Status == AttendanceStatus.AbsentUnexcused);
-      return total > 0 && (double)absent / total > 0.3;
+      var absent = g.Count(a => a.Status == AttendanceStatus.AbsentUnexcused || a.Status == AttendanceStatus.AbsentExcused);
+      return total > 0 && (double)absent / total > 0.25;
     });
 
     return Result<GroupAttendanceStatsResult>.Success(
@@ -292,7 +292,7 @@ public class ReportService : IReportService
     var group =
       await _groups.GetByIdAsync(groupId, ct) ?? throw new NotFoundException("Group", groupId);
 
-    var t = threshold ?? 0.3;
+    var t = threshold ?? 0.25;
 
     var attendances = await _attendances
       .GetAll()
@@ -317,7 +317,7 @@ public class ReportService : IReportService
       .Where(g =>
       {
         var total = g.Count();
-        var absent = g.Count(a => a.Status == AttendanceStatus.AbsentUnexcused);
+        var absent = g.Count(a => a.Status == AttendanceStatus.AbsentUnexcused || a.Status == AttendanceStatus.AbsentExcused);
         return total > 0 && (double)absent / total > t;
       })
       .Select(g =>
@@ -334,9 +334,9 @@ public class ReportService : IReportService
           g.Key.StudentId,
           g.Key.Name,
           g.Count(),
-          g.Count(a => a.Status == AttendanceStatus.AbsentUnexcused),
+          g.Count(a => a.Status == AttendanceStatus.AbsentUnexcused || a.Status == AttendanceStatus.AbsentExcused),
           Math.Round(
-            (double)g.Count(a => a.Status == AttendanceStatus.AbsentUnexcused) / g.Count() * 100,
+            (double)g.Count(a => a.Status == AttendanceStatus.AbsentUnexcused || a.Status == AttendanceStatus.AbsentExcused) / g.Count() * 100,
             1
           ),
           avgGrade

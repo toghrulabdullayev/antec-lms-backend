@@ -4,9 +4,9 @@ public record AttendanceReportResult(
   int TotalLessons,
   int TotalRecords,
   int Present,
-  int AbsentUnexcused,
+  int Absent,
   int Late,
-  int AbsentExcused,
+  int Excused,
   double AttendancePercentage,
   List<AttendanceReportDetail> Details
 );
@@ -15,9 +15,9 @@ public record AttendanceReportDetail(
   int StudentId,
   string? StudentName,
   int Present,
-  int AbsentUnexcused,
+  int Absent,
   int Late,
-  int AbsentExcused,
+  int Excused,
   double AttendancePercentage
 );
 
