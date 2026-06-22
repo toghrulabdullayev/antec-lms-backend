@@ -8,10 +8,11 @@ public record CreateLessonDto(
   DateTime LessonDate,
   string Topic,
   string? Note,
-  string Status
+  string Status,
+  string? Type
 );
 
-public record UpdateLessonDto(DateTime? LessonDate, string? Topic, string? Note, string? Status);
+public record UpdateLessonDto(DateTime? LessonDate, string? Topic, string? Note, string? Status, string? Type);
 
 public record LessonDetail(
   int Id,
@@ -23,6 +24,7 @@ public record LessonDetail(
   string Topic,
   string? Note,
   string Status,
+  string Type,
   DateTime CreatedAt,
   List<LessonAttendanceItem> Attendances,
   List<LessonGradeItem> Grades
@@ -46,6 +48,7 @@ public record LessonResponse(
   DateTime LessonDate,
   string Topic,
   string Status,
+  string Type,
   DateTime CreatedAt
 );
 
@@ -54,6 +57,7 @@ public record GroupLessonItem(
   DateTime LessonDate,
   string Topic,
   string Status,
+  string Type,
   int AttendanceCount,
   int GradeCount
 );
