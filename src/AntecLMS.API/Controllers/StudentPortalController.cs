@@ -29,27 +29,24 @@ public class StudentPortalController : BaseApiController
     var result = await _portal.GetMyLessonsAsync(ct);
     return ToResponse(result);
   }
-
-  [HttpGet("attendance")]
-  public async Task<IActionResult> GetMyAttendance(CancellationToken ct)
+  [HttpGet("my-groups")]
+  public async Task<IActionResult> GetMyGroups(CancellationToken ct)
   {
-    var result = await _portal.GetMyAttendanceAsync(ct);
+    var result = await _portal.GetMyGroupsAsync(ct);
     return ToResponse(result);
   }
 
-  [HttpGet("grades")]
-  public async Task<IActionResult> GetMyGrades(CancellationToken ct)
+
+  [HttpGet("attendance-journal")]
+  public async Task<IActionResult> GetAttendanceJournal(DateTime? start, DateTime? end, CancellationToken ct)
   {
-    var result = await _portal.GetMyGradesAsync(ct);
+    var result = await _portal.GetAttendanceJournalAsync(start, end, ct);
     return ToResponse(result);
   }
 
-  [HttpGet("materials")]
-  public async Task<IActionResult> GetMyMaterials(CancellationToken ct)
-  {
-    var result = await _portal.GetMyMaterialsAsync(ct);
-    return ToResponse(result);
-  }
+
+
+
 
   [HttpGet("profile")]
   public async Task<IActionResult> GetMyProfile(CancellationToken ct)
