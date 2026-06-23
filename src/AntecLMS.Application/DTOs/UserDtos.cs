@@ -47,3 +47,4 @@ public record UserDetailResponse(
   DateTime CreatedAt,
   DateTime? UpdatedAt
 );
+

@@ -19,7 +19,15 @@ public class MaterialRepository : BaseRepository<Material>, IMaterialRepository
     await _set.Where(m => m.LessonId == lessonId)
       .OrderByDescending(m => m.CreatedAt)
       .ToListAsync(ct);
-
+  public async Task<List<Material>> GetByStudentGroupsAsync(int studentId, CancellationToken ct)
+  {
+    // Tələbənin qruplarını tap və o qruplara aid materialları çək
+    return await _context.Materials
+        .Include(m => m.Lesson)
+        .Where(m => _context.GroupStudents
+            .Any(sg => sg.StudentId == studentId && sg.GroupId == m.GroupId))
+        .ToListAsync(ct);
+  }
   public async Task<List<Material>> GetByStudentUserIdAsync(
     int userId,
     CancellationToken ct = default

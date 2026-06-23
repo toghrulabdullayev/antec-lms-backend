@@ -38,3 +38,12 @@ public record AttendanceItem(
   string? TeacherNote,
   DateTime CreatedAt
 );
+public record AttendanceJournalResponse(
+    List<AttendanceItem> Items,
+    int PresentCount,
+    int ExcusedCount,
+    int AbsentCount,
+    int LateCount,
+    double Percentage
+);
+

@@ -3,6 +3,7 @@ using System;
 using AntecLMS.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,13 +12,14 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AntecLMS.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260623062831_GradesAttendance")]
+    partial class GradesAttendance
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("public")
                 .HasAnnotation("ProductVersion", "10.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -78,7 +80,7 @@ namespace AntecLMS.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_attendances_lesson_id_student_id");
 
-                    b.ToTable("attendances", "public");
+                    b.ToTable("attendances", (string)null);
                 });
 
             modelBuilder.Entity("AntecLMS.Domain.Entities.Course", b =>
@@ -126,7 +128,7 @@ namespace AntecLMS.Infrastructure.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_courses");
 
-                    b.ToTable("courses", "public");
+                    b.ToTable("courses", (string)null);
                 });
 
             modelBuilder.Entity("AntecLMS.Domain.Entities.Grade", b =>
@@ -180,7 +182,7 @@ namespace AntecLMS.Infrastructure.Persistence.Migrations
                     b.HasIndex("StudentId")
                         .HasDatabaseName("ix_grades_student_id");
 
-                    b.ToTable("grades", "public");
+                    b.ToTable("grades", (string)null);
                 });
 
             modelBuilder.Entity("AntecLMS.Domain.Entities.Group", b =>
@@ -236,7 +238,7 @@ namespace AntecLMS.Infrastructure.Persistence.Migrations
                     b.HasIndex("TeacherId")
                         .HasDatabaseName("ix_groups_teacher_id");
 
-                    b.ToTable("groups", "public");
+                    b.ToTable("groups", (string)null);
                 });
 
             modelBuilder.Entity("AntecLMS.Domain.Entities.GroupStudent", b =>
@@ -284,7 +286,7 @@ namespace AntecLMS.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_group_students_group_id_student_id");
 
-                    b.ToTable("group_students", "public");
+                    b.ToTable("group_students", (string)null);
                 });
 
             modelBuilder.Entity("AntecLMS.Domain.Entities.Lesson", b =>
@@ -328,10 +330,6 @@ namespace AntecLMS.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(300)")
                         .HasColumnName("topic");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer")
-                        .HasColumnName("type");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -345,7 +343,7 @@ namespace AntecLMS.Infrastructure.Persistence.Migrations
                     b.HasIndex("TeacherId")
                         .HasDatabaseName("ix_lessons_teacher_id");
 
-                    b.ToTable("lessons", "public");
+                    b.ToTable("lessons", (string)null);
                 });
 
             modelBuilder.Entity("AntecLMS.Domain.Entities.Material", b =>
@@ -415,7 +413,7 @@ namespace AntecLMS.Infrastructure.Persistence.Migrations
                     b.HasIndex("TeacherId")
                         .HasDatabaseName("ix_materials_teacher_id");
 
-                    b.ToTable("materials", "public");
+                    b.ToTable("materials", (string)null);
                 });
 
             modelBuilder.Entity("AntecLMS.Domain.Entities.Student", b =>
@@ -460,7 +458,7 @@ namespace AntecLMS.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_students_user_id");
 
-                    b.ToTable("students", "public");
+                    b.ToTable("students", (string)null);
                 });
 
             modelBuilder.Entity("AntecLMS.Domain.Entities.Teacher", b =>
@@ -506,7 +504,7 @@ namespace AntecLMS.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_teachers_user_id");
 
-                    b.ToTable("teachers", "public");
+                    b.ToTable("teachers", (string)null);
                 });
 
             modelBuilder.Entity("AntecLMS.Domain.Entities.User", b =>
@@ -571,7 +569,7 @@ namespace AntecLMS.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_users_email");
 
-                    b.ToTable("users", "public");
+                    b.ToTable("users", (string)null);
                 });
 
             modelBuilder.Entity("AntecLMS.Domain.Entities.Attendance", b =>
