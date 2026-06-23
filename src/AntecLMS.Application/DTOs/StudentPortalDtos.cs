@@ -5,7 +5,9 @@ public record MyDashboardResponse(
   MyGroupInfo? Group,
   List<MyRecentLesson> RecentLessons,
   List<MyRecentGrade> RecentGrades,
-  MyAttendanceSummary AttendanceSummary
+  MyAttendanceSummary AttendanceSummary,
+  double FinalGrade,       
+  bool IsEligibleForFinal  
 );
 
 public record MyGroupInfo(int Id, string Name, string Status);
@@ -45,14 +47,6 @@ public record MyAttendanceItem(
 );
 
 // Grades
-public record MyGradeItem(
-  int Id,
-  string LessonTopic,
-  DateTime LessonDate,
-  int Score,
-  int MaxScore,
-  string? TeacherNote
-);
 
 // Materials
 public record MyMaterialDetail(

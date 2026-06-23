@@ -1,6 +1,7 @@
 using AntecLMS.Application.Common.Interfaces;
 using AntecLMS.Application.Common.Models;
 using AntecLMS.Application.DTOs;
+using AntecLMS.Domain.Entities;
 using AntecLMS.Domain.Enums;
 using AntecLMS.Domain.Repositories;
 
@@ -71,16 +72,26 @@ public class StudentPortalService : IStudentPortalService
     var attendances = await _attendance.GetByStudentAsync(student.Id, ct);
 
     var summary = new MyAttendanceSummary(
-      Total: attendances.Count,
-      Present: attendances.Count(a => a.Status == AttendanceStatus.Present),
-      Absent: attendances.Count(a =>
-        a.Status == AttendanceStatus.Excused || a.Status == AttendanceStatus.Absent
-      ),
-      Late: attendances.Count(a => a.Status == AttendanceStatus.Late)
-    );
+    Total: attendances.Count,
+    Present: attendances.Count(a => a.Status == AttendanceStatus.Present),
+    Absent: attendances.Count(a =>
+      a.Status == AttendanceStatus.Excused || a.Status == AttendanceStatus.Absent
+    ),
+    Late: attendances.Count(a => a.Status == AttendanceStatus.Late)
+  );
+
+  
+    var labAvg = grades.Where(g => g.Category == GradeCategory.Lab).Average(g => (double)g.Score);
+    var modulAvg = grades.Where(g => g.Category == GradeCategory.Modul).Average(g => (double)g.Score);
+    var final = grades.FirstOrDefault(g => g.Category == GradeCategory.Final)?.Score ?? 0;
+
+    double finalGrade = ((0.5 * labAvg + 0.5 * modulAvg) * 0.6) + (final * 0.4);
+
+   
+    bool isEligible = summary.Total > 0 && ((double)summary.Absent / summary.Total) <= 0.25;
 
     return Result<MyDashboardResponse>.Success(
-      new MyDashboardResponse(groupInfo, recentLessons, recentGrades, summary)
+      new MyDashboardResponse(groupInfo, recentLessons, recentGrades, summary, finalGrade, isEligible)
     );
   }
 
@@ -109,77 +120,153 @@ public class StudentPortalService : IStudentPortalService
     return Result<List<MyLessonItem>>.Success(data);
   }
 
-  public async Task<Result<List<MyAttendanceItem>>> GetMyAttendanceAsync(CancellationToken ct)
+
+
+  public async Task<Result<List<MyGroupDetail>>> GetMyGroupsAsync(CancellationToken ct)
   {
+   
     var student = await _students.GetByUserIdAsync(_currentUser.UserId, ct);
     if (student is null)
-      return Result<List<MyAttendanceItem>>.Failure("Tələbə tapılmadı.", 404);
+      return Result<List<MyGroupDetail>>.Failure("Tələbə tapılmadı.", 404);
 
+   
+    var data = student.GroupStudents
+      .Select(gs =>
+      {
+        var group = gs.Group;
+        var allGrades = (group.GroupStudents ?? Enumerable.Empty<GroupStudent>())
+          .SelectMany(gst => gst.Student?.Grades ?? Enumerable.Empty<Grade>());
+
+        var avg = allGrades.Any()
+          ? allGrades.Average(g => (double)g.Score / g.MaxScore * 100)
+          : 0;
+
+        return new MyGroupDetail(
+          group.Id,
+          group.Name,
+          group.Lessons?.Count ?? 0, 
+          avg,
+          gs.Status.ToString() 
+        );
+      })
+      .ToList();
+
+    return Result<List<MyGroupDetail>>.Success(data);
+  }
+
+  public async Task<Result<AttendanceJournalResponse>> GetAttendanceJournalAsync(DateTime? startDate, DateTime? endDate, CancellationToken ct)
+  {
+    var student = await _students.GetByUserIdAsync(_currentUser.UserId, ct);
+    if (student is null) return Result<AttendanceJournalResponse>.Failure("Tələbə tapılmadı.", 404);
+
+    // Bütün davamiyyəti çək
     var items = await _attendance.GetByStudentAsync(student.Id, ct);
 
-    var data = items
-      .Select(a => new MyAttendanceItem(
-        a.Id,
-        a.Lesson.LessonDate,
-        a.Lesson.Topic ?? "",
-        a.Status.ToString().ToLower(),
-        a.MinutesLate,
-        a.Reason
-      ))
-      .ToList();
+    // Tarixə görə filterləmə
+    var filtered = items.Where(a =>
+        (!startDate.HasValue || a.Lesson.LessonDate >= startDate) &&
+        (!endDate.HasValue || a.Lesson.LessonDate <= endDate)
+    ).ToList();
 
-    return Result<List<MyAttendanceItem>>.Success(data);
+    // Statistikanı hesabla
+    var present = filtered.Count(a => a.Status == AttendanceStatus.Present);
+    var excused = filtered.Count(a => a.Status == AttendanceStatus.Excused);
+    var absent = filtered.Count(a => a.Status == AttendanceStatus.Absent);
+    var late = filtered.Count(a => a.Status == AttendanceStatus.Late);
+
+    var total = filtered.Count;
+    var percentage = total > 0 ? (double)present / total * 100 : 0;
+
+    // Cavabı formalaşdır
+    var data = filtered.Select(a => new AttendanceItem(
+        a.Id, a.StudentId, $"{student.User.Name} {student.User.Surname}",
+        a.Status.ToString(), a.MinutesLate, a.Reason, a.TeacherNote, a.CreatedAt
+    )).ToList();
+
+    return Result<AttendanceJournalResponse>.Success(new AttendanceJournalResponse(
+        data, present, excused, absent, late, percentage
+    ));
   }
 
-  public async Task<Result<List<MyGradeItem>>> GetMyGradesAsync(CancellationToken ct)
+  public async Task<Result<GradeJournalResponse>> GetGradeJournalAsync(DateTime? startDate, DateTime? endDate, CancellationToken ct)
+  {
+    var student = await _students.GetByUserIdAsync(_currentUser.UserId, ct);
+    if (student is null) return Result<GradeJournalResponse>.Failure("Tələbə tapılmadı.", 404);
+
+    var grades = await _grades.GetByStudentAsync(student.Id, ct);
+    var attendances = await _attendance.GetByStudentAsync(student.Id, ct);
+
+   
+    var filtered = grades.Where(g =>
+        (!startDate.HasValue || g.Lesson.LessonDate >= startDate) &&
+        (!endDate.HasValue || g.Lesson.LessonDate <= endDate)
+    ).ToList();
+
+    var items = filtered.Select(g => new MyGradeItem(
+        g.Id, g.Lesson.Topic ?? "", g.Lesson.LessonDate, g.Score, g.MaxScore, g.TeacherNote
+    )).ToList();
+
+   
+    var totalLessons = attendances.Count;
+    var absents = attendances.Count(a => a.Status == AttendanceStatus.Absent || a.Status == AttendanceStatus.Excused);
+    bool canAttendFinal = (totalLessons == 0) || ((double)absents / totalLessons <= 0.25);
+
+    var avgPercentage = items.Any() ? items.Average(i => i.Percentage) : 0;
+    var maxScore = items.Any() ? items.Max(i => i.Score) : 0;
+    var minScore = items.Any() ? items.Min(i => i.Score) : 0;
+
+    // 3. İndi return edərkən hamısı tanınacaq
+    return Result<GradeJournalResponse>.Success(new GradeJournalResponse(
+        items,
+        totalLessons,
+        Math.Round(avgPercentage, 2),
+        maxScore,
+        minScore,
+        canAttendFinal,
+        null
+    ));
+  }
+
+  public async Task<Result<List<MaterialItem>>> GetMyMaterialsAsync(string? type, CancellationToken ct)
   {
     var student = await _students.GetByUserIdAsync(_currentUser.UserId, ct);
     if (student is null)
-      return Result<List<MyGradeItem>>.Failure("Tələbə tapılmadı.", 404);
+      return Result<List<MaterialItem>>.Failure("Tələbə tapılmadı.", 404);
 
-    var items = await _grades.GetByStudentAsync(student.Id, ct);
+    // Bütün materialları qruplar üzrə çək
+    var materials = await _materials.GetByStudentGroupsAsync(student.Id, ct);
 
-    var data = items
-      .Select(g => new MyGradeItem(
-        g.Id,
-        g.Lesson.Topic ?? "",
-        g.Lesson.LessonDate,
-        g.Score,
-        g.MaxScore,
-        g.TeacherNote
-      ))
-      .ToList();
+    // Tipə görə filterləmə (Frontend "Hamısı" göndərirsə, hamısını qaytar)
+    if (!string.IsNullOrEmpty(type) && type != "Hamısı")
+    {
+      materials = materials.Where(m => m.Type.Equals(type, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
 
-    return Result<List<MyGradeItem>>.Success(data);
-  }
+    var data = materials.Select(m => new MaterialItem(
+    m.Id,
+    m.LessonId,
+    m.Lesson?.Topic ?? "Adsız dərs", // Burada '?' işarəsi əlavə etdik (null-check)
+    m.Title,
+    m.Type,
+    m.Url,
+    m.FilePath,
+    m.Description,
+    m.CreatedAt
+)).ToList();
 
-  public async Task<Result<List<MyMaterialDetail>>> GetMyMaterialsAsync(CancellationToken ct)
-  {
-    var items = await _materials.GetByStudentUserIdAsync(_currentUser.UserId, ct);
-
-    var data = items
-      .Select(m => new MyMaterialDetail(
-        m.Id,
-        m.Title,
-        m.Description,
-        m.Type ?? "",
-        m.FilePath,
-        m.Lesson.Topic ?? "",
-        m.Lesson.LessonDate
-      ))
-      .ToList();
-
-    return Result<List<MyMaterialDetail>>.Success(data);
+    return Result<List<MaterialItem>>.Success(data);
   }
 
   public async Task<Result<MyProfileResponse>> GetMyProfileAsync(CancellationToken ct)
   {
     var student = await _students.GetByUserIdAsync(_currentUser.UserId, ct);
-    if (student is null)
-      return Result<MyProfileResponse>.Failure("Tələbə tapılmadı.", 404);
 
-    return Result<MyProfileResponse>.Success(
-      new MyProfileResponse(
+    // Null yoxlanışını daha təmiz formatda
+    if (student?.User is null)
+      return Result<MyProfileResponse>.Failure("Tələbə və ya istifadəçi məlumatları tapılmadı.", 404);
+
+    // Məlumatları birbaşa konstruktora ötürürük
+    var profile = new MyProfileResponse(
         student.Id,
         student.User.Name,
         student.User.Surname,
@@ -188,26 +275,32 @@ public class StudentPortalService : IStudentPortalService
         student.BirthDate,
         student.Note,
         student.Status.ToString().ToLower()
-      )
     );
+
+    return Result<MyProfileResponse>.Success(profile);
   }
 
-  public async Task<Result> ChangePasswordAsync(
-    string currentPassword,
-    string newPassword,
-    CancellationToken ct
-  )
+  public async Task<Result> ChangePasswordAsync(string currentPassword, string newPassword, CancellationToken ct)
   {
     var user = await _users.GetByIdAsync(_currentUser.UserId, ct);
+
     if (user is null)
       return Result.Failure("İstifadəçi tapılmadı.", 404);
 
+    // Şifrə yoxlanışı
     if (!_hasher.Verify(currentPassword, user.Password))
       return Result.Failure("Mövcud şifrə yanlışdır.", 422);
 
-    user.ChangePassword(_hasher.Hash(newPassword));
+    // Şifrəni hash-ləyib dəyişirik
+    var hashedPassword = _hasher.Hash(newPassword);
+    user.ChangePassword(hashedPassword);
+
     await _uow.SaveChangesAsync(ct);
 
     return Result.Success();
   }
+
+  
+
+
 }

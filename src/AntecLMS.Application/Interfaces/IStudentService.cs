@@ -17,9 +17,6 @@ public interface IStudentService
   Task<Result<StudentResponse>> CreateAsync(CreateStudentDto dto, CancellationToken ct);
   Task<Result<StudentResponse>> UpdateAsync(int id, UpdateStudentDto dto, CancellationToken ct);
   Task<Result> DeleteAsync(int id, CancellationToken ct);
-  Task<Result<List<StudentAttendanceItem>>> GetAttendancesAsync(
-    int studentId,
-    CancellationToken ct
-  );
+  Task<Result<List<StudentAttendanceItem>>> GetAttendancesAsync(int studentId, CancellationToken ct);
   Task<Result<List<StudentGradeItem>>> GetGradesAsync(int studentId, CancellationToken ct);
 }

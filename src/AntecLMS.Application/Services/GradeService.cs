@@ -26,7 +26,7 @@ public class GradeService : IGradeService
     _uow = uow;
   }
 
-  public async Task<Result<List<GradeItem>>> GetByLessonAsync(int lessonId, CancellationToken ct)
+  public async Task<Result<List<MyGradeItem>>> GetByLessonAsync(int lessonId, CancellationToken ct)
   {
     _ =
       await _lessons.GetByIdAsync(lessonId, ct) ?? throw new NotFoundException("Lesson", lessonId);
@@ -34,18 +34,17 @@ public class GradeService : IGradeService
     var items = await _grades.GetByLessonAsync(lessonId, ct);
 
     var data = items
-      .Select(g => new GradeItem(
+      .Select(g => new MyGradeItem(
         g.Id,
-        g.StudentId,
-        $"{g.Student?.User?.Name} {g.Student?.User?.Surname}",
+        g.Lesson?.Topic,
+        g.CreatedAt,
         g.Score,
         g.MaxScore,
-        g.TeacherNote,
-        g.CreatedAt
+        g.TeacherNote
       ))
       .ToList();
 
-    return Result<List<GradeItem>>.Success(data);
+    return Result<List<MyGradeItem>>.Success(data);
   }
 
   public async Task<Result<List<StudentGradeItem>>> GetByStudentAsync(
@@ -137,5 +136,10 @@ public class GradeService : IGradeService
     _grades.Remove(grade);
     await _uow.SaveChangesAsync(ct);
     return Result.Success();
+  }
+
+  Task<Result<List<MyGradeItem>>> IGradeService.GetByLessonAsync(int lessonId, CancellationToken ct)
+  {
+    throw new NotImplementedException();
   }
 }
