@@ -66,9 +66,9 @@ public record LessonAttendanceStat(
   DateTime LessonDate,
   string Topic,
   int Present,
-  int Absent,
+  int AbsentUnexcused,
   int Late,
-  int Excused,
+  int AbsentExcused,
   double AttendanceRate
 );
 

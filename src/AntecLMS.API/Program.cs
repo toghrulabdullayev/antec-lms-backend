@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using AntecLMS.API.Middleware;
 using AntecLMS.Application;
 using AntecLMS.Infrastructure;
@@ -15,6 +16,7 @@ builder
   .AddJsonOptions(options =>
   {
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
   });
 builder.Services.AddEndpointsApiExplorer();
 

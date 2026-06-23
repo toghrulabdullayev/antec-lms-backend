@@ -74,7 +74,7 @@ public class StudentPortalService : IStudentPortalService
       Total: attendances.Count,
       Present: attendances.Count(a => a.Status == AttendanceStatus.Present),
       Absent: attendances.Count(a =>
-        a.Status == AttendanceStatus.Excused || a.Status == AttendanceStatus.Absent
+        a.Status == AttendanceStatus.AbsentExcused || a.Status == AttendanceStatus.AbsentUnexcused
       ),
       Late: attendances.Count(a => a.Status == AttendanceStatus.Late)
     );
@@ -122,7 +122,7 @@ public class StudentPortalService : IStudentPortalService
         a.Id,
         a.Lesson.LessonDate,
         a.Lesson.Topic ?? "",
-        a.Status.ToString().ToLower(),
+        a.Status.ToApiString(),
         a.MinutesLate,
         a.Reason
       ))

@@ -11,6 +11,7 @@ public class Lesson : BaseEntity
   public string? Topic { get; private set; }
   public string? Note { get; private set; }
   public LessonStatus Status { get; private set; }
+  public LessonType Type { get; private set; }
 
   // Nav
   public Group Group { get; set; } = default!;
@@ -27,7 +28,8 @@ public class Lesson : BaseEntity
     DateTime lessonDate,
     string? topic,
     string? note,
-    LessonStatus status
+    LessonStatus status,
+    LessonType type
   ) =>
     new()
     {
@@ -37,14 +39,22 @@ public class Lesson : BaseEntity
       Topic = topic,
       Note = note,
       Status = status,
+      Type = type,
     };
 
-  public void Update(DateTime lessonDate, string? topic, string? note, LessonStatus status)
+  public void Update(
+    DateTime lessonDate,
+    string? topic,
+    string? note,
+    LessonStatus status,
+    LessonType type
+  )
   {
     LessonDate = lessonDate;
     Topic = topic;
     Note = note;
     Status = status;
+    Type = type;
     MarkUpdated();
   }
 }

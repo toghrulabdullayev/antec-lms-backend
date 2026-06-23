@@ -20,7 +20,12 @@ public static class DependencyInjection
   )
   {
     services.AddDbContext<AppDbContext>(options =>
-      options.UseNpgsql(config.GetConnectionString("Default")).UseSnakeCaseNamingConvention()
+      options
+        .UseNpgsql(
+          config.GetConnectionString("Default"),
+          o => o.MigrationsHistoryTable("__EFMigrationsHistory", "public")
+        )
+        .UseSnakeCaseNamingConvention()
     );
 
     services.AddScoped<IUserRepository, UserRepository>();
