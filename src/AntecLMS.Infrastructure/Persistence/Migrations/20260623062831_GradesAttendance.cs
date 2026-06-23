@@ -4,26 +4,25 @@
 
 namespace AntecLMS.Infrastructure.Persistence.Migrations
 {
+  /// <inheritdoc />
+  public partial class GradesAttendance : Migration
+  {
     /// <inheritdoc />
-    public partial class GradesAttendance : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<int>(
-                name: "category",
-                table: "grades",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "category",
-                table: "grades");
-        }
+      migrationBuilder.AddColumn<int>(
+        name: "category",
+        table: "grades",
+        type: "integer",
+        nullable: false,
+        defaultValue: 0
+      );
     }
+
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+      migrationBuilder.DropColumn(name: "category", table: "grades");
+    }
+  }
 }

@@ -9,14 +9,12 @@ public interface IStudentPortalService
   Task<Result<List<MyGroupDetail>>> GetMyGroupsAsync(CancellationToken ct);
   Task<Result<List<MyLessonItem>>> GetMyLessonsAsync(CancellationToken ct);
 
-
- 
   Task<Result<MyProfileResponse>> GetMyProfileAsync(CancellationToken ct);
   Task<Result<AttendanceJournalResponse>> GetAttendanceJournalAsync(
     DateTime? start,
     DateTime? end,
     CancellationToken ct
-);
+  );
   Task<Result<List<MaterialItem>>> GetMyMaterialsAsync(string? type, CancellationToken ct);
   Task<Result> ChangePasswordAsync(
     string currentPassword,

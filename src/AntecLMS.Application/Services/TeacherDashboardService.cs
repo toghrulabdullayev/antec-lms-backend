@@ -78,7 +78,7 @@ public class TeacherDashboardService : ITeacherDashboardService
         l.Id,
         l.Group?.Name,
         l.LessonDate,
-        l.Topic,
+        l.Topic ?? "",
         l.Status.ToString().ToLower()
       ))
       .ToList();

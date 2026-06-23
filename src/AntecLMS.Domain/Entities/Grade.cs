@@ -2,7 +2,12 @@ using AntecLMS.Domain.Common;
 
 namespace AntecLMS.Domain.Entities;
 
-public enum GradeCategory { Lab, Modul, Final }
+public enum GradeCategory
+{
+  Lab,
+  Modul,
+  Final,
+}
 
 public class Grade : BaseEntity
 {
@@ -33,7 +38,7 @@ public class Grade : BaseEntity
       Score = score,
       MaxScore = maxScore,
       TeacherNote = teacherNote,
-      Category = GradeCategory.Modul
+      Category = GradeCategory.Modul,
     };
 
   public void Update(int score, int maxScore, string? teacherNote)

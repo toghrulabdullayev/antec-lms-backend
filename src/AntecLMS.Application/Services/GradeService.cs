@@ -36,7 +36,7 @@ public class GradeService : IGradeService
     var data = items
       .Select(g => new MyGradeItem(
         g.Id,
-        g.Lesson?.Topic,
+        g.Lesson?.Topic ?? "",
         g.CreatedAt,
         g.Score,
         g.MaxScore,
@@ -63,7 +63,7 @@ public class GradeService : IGradeService
         g.Id,
         g.LessonId,
         g.Lesson?.Topic,
-        g.Lesson.LessonDate,
+        g.Lesson!.LessonDate,
         g.Score,
         g.MaxScore,
         g.TeacherNote,

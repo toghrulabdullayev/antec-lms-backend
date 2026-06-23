@@ -287,7 +287,7 @@ public class ReportService : IReportService
         return new LessonAttendanceStat(
           l.Id,
           l.LessonDate,
-          l.Topic,
+          l.Topic ?? "",
           present,
           absent,
           late,

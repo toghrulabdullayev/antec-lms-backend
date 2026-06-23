@@ -10,7 +10,8 @@ public class GradeRepository : BaseRepository<Grade>, IGradeRepository
     : base(context) { }
 
   public async Task<List<Grade>> GetByLessonAsync(int lessonId, CancellationToken ct = default) =>
-    await _set.Include(g => g.Student)
+    await _set.Include(g => g.Lesson)
+      .Include(g => g.Student)
         .ThenInclude(s => s.User)
       .Where(g => g.LessonId == lessonId)
       .ToListAsync(ct);

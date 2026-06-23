@@ -225,9 +225,4 @@ public class StudentService : IStudentService
 
     return Result<List<StudentGradeItem>>.Success(items);
   }
-
-
-
-
-
 }

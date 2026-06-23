@@ -6,8 +6,8 @@ public record MyDashboardResponse(
   List<MyRecentLesson> RecentLessons,
   List<MyRecentGrade> RecentGrades,
   MyAttendanceSummary AttendanceSummary,
-  double FinalGrade,       
-  bool IsEligibleForFinal  
+  double FinalGrade,
+  bool IsEligibleForFinal
 );
 
 public record MyGroupInfo(int Id, string Name, string Status);

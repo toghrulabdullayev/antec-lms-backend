@@ -29,6 +29,7 @@ public class StudentPortalController : BaseApiController
     var result = await _portal.GetMyLessonsAsync(ct);
     return ToResponse(result);
   }
+
   [HttpGet("my-groups")]
   public async Task<IActionResult> GetMyGroups(CancellationToken ct)
   {
@@ -36,17 +37,16 @@ public class StudentPortalController : BaseApiController
     return ToResponse(result);
   }
 
-
   [HttpGet("attendance-journal")]
-  public async Task<IActionResult> GetAttendanceJournal(DateTime? start, DateTime? end, CancellationToken ct)
+  public async Task<IActionResult> GetAttendanceJournal(
+    DateTime? start,
+    DateTime? end,
+    CancellationToken ct
+  )
   {
     var result = await _portal.GetAttendanceJournalAsync(start, end, ct);
     return ToResponse(result);
   }
-
-
-
-
 
   [HttpGet("profile")]
   public async Task<IActionResult> GetMyProfile(CancellationToken ct)

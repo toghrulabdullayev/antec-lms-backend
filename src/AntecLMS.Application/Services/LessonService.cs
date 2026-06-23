@@ -47,7 +47,7 @@ public class LessonService : ILessonService
       .Select(l => new GroupLessonItem(
         l.Id,
         l.LessonDate,
-        l.Topic,
+        l.Topic ?? "",
         l.Status.ToString().ToLower(),
         l.Type.ToString().ToLower(),
         l.Attendances.Count,
@@ -82,7 +82,7 @@ public class LessonService : ILessonService
       lesson.TeacherId,
       $"{lesson.Teacher?.User?.Name} {lesson.Teacher?.User?.Surname}",
       lesson.LessonDate,
-      lesson.Topic,
+      lesson.Topic ?? "",
       lesson.Note,
       lesson.Status.ToString().ToLower(),
       lesson.Type.ToString().ToLower(),
@@ -153,7 +153,7 @@ public class LessonService : ILessonService
         lesson.GroupId,
         lesson.TeacherId,
         lesson.LessonDate,
-        lesson.Topic,
+        lesson.Topic ?? "",
         lesson.Status.ToString().ToLower(),
         lesson.Type.ToString().ToLower(),
         lesson.CreatedAt
@@ -199,7 +199,7 @@ public class LessonService : ILessonService
         lesson.GroupId,
         lesson.TeacherId,
         lesson.LessonDate,
-        lesson.Topic,
+        lesson.Topic ?? "",
         lesson.Status.ToString().ToLower(),
         lesson.Type.ToString().ToLower(),
         lesson.CreatedAt

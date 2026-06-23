@@ -69,7 +69,7 @@ public class AttendanceService : IAttendanceService
         a.Id,
         a.LessonId,
         a.Lesson?.Topic,
-        a.Lesson.LessonDate,
+        a.Lesson!.LessonDate,
         a.Status.ToApiString(),
         a.MinutesLate,
         a.Reason,

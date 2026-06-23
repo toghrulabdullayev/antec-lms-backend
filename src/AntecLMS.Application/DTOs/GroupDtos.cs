@@ -58,9 +58,9 @@ public record StudentInGroup(int Id, string Name, string Surname, string Status)
 public record AddStudentToGroupDto(int StudentId);
 
 public record MyGroupDetail(
-    int Id,
-    string Name,
-    int LessonCount,
-    double AverageGrade,
-    string Status
+  int Id,
+  string Name,
+  int LessonCount,
+  double AverageGrade,
+  string Status
 );
