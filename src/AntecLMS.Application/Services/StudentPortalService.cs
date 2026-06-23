@@ -129,26 +129,17 @@ public class StudentPortalService : IStudentPortalService
     if (student is null)
       return Result<List<MyGroupDetail>>.Failure("Tələbə tapılmadı.", 404);
 
-   
-    var data = student.GroupStudents
-      .Select(gs =>
-      {
-        var group = gs.Group;
-        var allGrades = (group.GroupStudents ?? Enumerable.Empty<GroupStudent>())
-          .SelectMany(gst => gst.Student?.Grades ?? Enumerable.Empty<Grade>());
+    var items = await _attendance.GetByStudentAsync(student.Id, ct);
 
-        var avg = allGrades.Any()
-          ? allGrades.Average(g => (double)g.Score / g.MaxScore * 100)
-          : 0;
-
-        return new MyGroupDetail(
-          group.Id,
-          group.Name,
-          group.Lessons?.Count ?? 0, 
-          avg,
-          gs.Status.ToString() 
-        );
-      })
+    var data = items
+      .Select(a => new MyAttendanceItem(
+        a.Id,
+        a.Lesson.LessonDate,
+        a.Lesson.Topic ?? "",
+        a.Status.ToString().ToLower(),
+        a.MinutesLate,
+        a.Reason
+      ))
       .ToList();
 
     return Result<List<MyGroupDetail>>.Success(data);

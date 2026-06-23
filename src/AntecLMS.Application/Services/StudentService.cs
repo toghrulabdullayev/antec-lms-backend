@@ -189,7 +189,7 @@ public class StudentService : IStudentService
         a.LessonId,
         a.Lesson.Topic + " - " + a.Lesson.LessonDate,
         a.Lesson.LessonDate,
-        a.Status.ToString().ToLower(),
+        a.Status.ToApiString(),
         a.MinutesLate,
         a.Reason,
         a.TeacherNote,

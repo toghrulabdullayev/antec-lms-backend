@@ -49,6 +49,7 @@ public class LessonService : ILessonService
         l.LessonDate,
         l.Topic,
         l.Status.ToString().ToLower(),
+        l.Type.ToString().ToLower(),
         l.Attendances.Count,
         l.Grades.Count
       ))
@@ -84,13 +85,14 @@ public class LessonService : ILessonService
       lesson.Topic,
       lesson.Note,
       lesson.Status.ToString().ToLower(),
+      lesson.Type.ToString().ToLower(),
       lesson.CreatedAt,
       lesson
         .Attendances.Select(a => new LessonAttendanceItem(
           a.Id,
           a.StudentId,
           $"{a.Student?.User?.Name} {a.Student?.User?.Surname}",
-          a.Status.ToString().ToLower(),
+          a.Status.ToApiString(),
           a.MinutesLate,
           a.Reason
         ))
@@ -124,13 +126,22 @@ public class LessonService : ILessonService
       _ => LessonStatus.Draft,
     };
 
+    var type = dto.Type?.ToLower() switch
+    {
+      "lab" => LessonType.Lab,
+      "modul" => LessonType.Modul,
+      "final" => LessonType.Final,
+      _ => LessonType.Ders,
+    };
+
     var lesson = Lesson.Create(
       dto.GroupId,
       dto.TeacherId,
       dto.LessonDate,
       dto.Topic,
       dto.Note,
-      status
+      status,
+      type
     );
 
     await _lessons.AddAsync(lesson, ct);
@@ -144,6 +155,7 @@ public class LessonService : ILessonService
         lesson.LessonDate,
         lesson.Topic,
         lesson.Status.ToString().ToLower(),
+        lesson.Type.ToString().ToLower(),
         lesson.CreatedAt
       ),
       201
@@ -168,7 +180,16 @@ public class LessonService : ILessonService
       _ => lesson.Status,
     };
 
-    lesson.Update(lessonDate, topic, note, status);
+    var type = dto.Type?.ToLower() switch
+    {
+      "lab" => LessonType.Lab,
+      "modul" => LessonType.Modul,
+      "final" => LessonType.Final,
+      "ders" => LessonType.Ders,
+      _ => lesson.Type,
+    };
+
+    lesson.Update(lessonDate, topic, note, status, type);
     _lessons.Update(lesson);
     await _uow.SaveChangesAsync(ct);
 
@@ -180,6 +201,7 @@ public class LessonService : ILessonService
         lesson.LessonDate,
         lesson.Topic,
         lesson.Status.ToString().ToLower(),
+        lesson.Type.ToString().ToLower(),
         lesson.CreatedAt
       )
     );
