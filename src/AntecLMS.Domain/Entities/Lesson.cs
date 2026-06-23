@@ -39,10 +39,16 @@ public class Lesson : BaseEntity
       Topic = topic,
       Note = note,
       Status = status,
-      Type = type
+      Type = type,
     };
 
-  public void Update(DateTime lessonDate, string? topic, string? note, LessonStatus status, LessonType type)
+  public void Update(
+    DateTime lessonDate,
+    string? topic,
+    string? note,
+    LessonStatus status,
+    LessonType type
+  )
   {
     LessonDate = lessonDate;
     Topic = topic;

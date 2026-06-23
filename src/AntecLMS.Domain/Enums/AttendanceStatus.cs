@@ -5,15 +5,15 @@ namespace AntecLMS.Domain.Enums;
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum AttendanceStatus
 {
-    [JsonPropertyName("present")]
-    Present,
+  [JsonPropertyName("present")]
+  Present,
 
-    [JsonPropertyName("late")]
-    Late,
+  [JsonPropertyName("late")]
+  Late,
 
-    [JsonPropertyName("absent_excused")]
-    AbsentExcused,
+  [JsonPropertyName("absent_excused")]
+  AbsentExcused,
 
-    [JsonPropertyName("absent_unexcused")]
-    AbsentUnexcused,
+  [JsonPropertyName("absent_unexcused")]
+  AbsentUnexcused,
 }

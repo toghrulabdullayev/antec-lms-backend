@@ -31,7 +31,5 @@ public class AttendanceRepository : BaseRepository<Attendance>, IAttendanceRepos
     int lessonId,
     int studentId,
     CancellationToken ct = default
-) =>
-    await _set
-        .FirstOrDefaultAsync(a => a.LessonId == lessonId && a.StudentId == studentId, ct);
+  ) => await _set.FirstOrDefaultAsync(a => a.LessonId == lessonId && a.StudentId == studentId, ct);
 }

@@ -1,11 +1,11 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using AntecLMS.API.Middleware;
 using AntecLMS.Application;
 using AntecLMS.Infrastructure;
 using AntecLMS.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 

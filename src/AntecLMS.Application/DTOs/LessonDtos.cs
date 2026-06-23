@@ -12,7 +12,13 @@ public record CreateLessonDto(
   string? Type
 );
 
-public record UpdateLessonDto(DateTime? LessonDate, string? Topic, string? Note, string? Status, string? Type);
+public record UpdateLessonDto(
+  DateTime? LessonDate,
+  string? Topic,
+  string? Note,
+  string? Status,
+  string? Type
+);
 
 public record LessonDetail(
   int Id,

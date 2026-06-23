@@ -128,10 +128,10 @@ public class LessonService : ILessonService
 
     var type = dto.Type?.ToLower() switch
     {
-      "lab"   => LessonType.Lab,
+      "lab" => LessonType.Lab,
       "modul" => LessonType.Modul,
       "final" => LessonType.Final,
-      _       => LessonType.Ders,
+      _ => LessonType.Ders,
     };
 
     var lesson = Lesson.Create(
@@ -182,11 +182,11 @@ public class LessonService : ILessonService
 
     var type = dto.Type?.ToLower() switch
     {
-      "lab"   => LessonType.Lab,
+      "lab" => LessonType.Lab,
       "modul" => LessonType.Modul,
       "final" => LessonType.Final,
-      "ders"  => LessonType.Ders,
-      _       => lesson.Type,  
+      "ders" => LessonType.Ders,
+      _ => lesson.Type,
     };
 
     lesson.Update(lessonDate, topic, note, status, type);

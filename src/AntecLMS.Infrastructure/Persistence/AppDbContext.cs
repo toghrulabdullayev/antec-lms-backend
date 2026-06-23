@@ -20,9 +20,9 @@ public class AppDbContext : DbContext
   public DbSet<Material> Materials => Set<Material>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
-{
+  {
     modelBuilder.HasDefaultSchema("public");
     modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     base.OnModelCreating(modelBuilder);
-}
+  }
 }
