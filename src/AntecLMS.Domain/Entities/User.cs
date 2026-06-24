@@ -41,10 +41,11 @@ public class User : BaseEntity
     };
   }
 
-  public void Update(string name, string surname, string? phone, UserStatus status)
+  public void Update(string name, string surname, string email, string? phone, UserStatus status)
   {
     Name = name;
     Surname = surname;
+    Email = email;
     Phone = phone;
     Status = status;
     MarkUpdated();

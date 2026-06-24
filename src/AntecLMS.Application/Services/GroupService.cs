@@ -147,12 +147,16 @@ public class GroupService : IGroupService
   {
     var group = await _groups.GetByIdAsync(id, ct) ?? throw new NotFoundException("Group", id);
 
+    var course = await _courses.GetByIdAsync(dto.CourseId, ct);
+    if (course is null)
+      return Result<GroupResponse>.Failure("Kurs tapılmadı.", 404);
+
     var teacher = await _teachers.GetByIdAsync(dto.TeacherId, ct);
     if (teacher is null)
       return Result<GroupResponse>.Failure("Müəllim tapılmadı.", 404);
 
     var status = Enum.Parse<GroupStatus>(dto.Status, true);
-    group.Update(dto.Name, dto.TeacherId, status);
+    group.Update(dto.Name, dto.CourseId, dto.TeacherId, dto.StartDate, dto.EndDate, status);
 
     _groups.Update(group);
     await _uow.SaveChangesAsync(ct);

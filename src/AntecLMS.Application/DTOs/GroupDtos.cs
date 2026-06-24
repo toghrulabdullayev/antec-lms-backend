@@ -11,7 +11,14 @@ public record CreateGroupDto(
   string Status
 );
 
-public record UpdateGroupDto(string Name, int TeacherId, string Status);
+public record UpdateGroupDto(
+  string Name,
+  int CourseId,
+  int TeacherId,
+  DateOnly StartDate,
+  DateOnly? EndDate,
+  string Status
+);
 
 public record GroupResponse(
   int Id,

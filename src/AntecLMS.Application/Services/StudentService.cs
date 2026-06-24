@@ -146,7 +146,13 @@ public class StudentService : IStudentService
       ?? throw new NotFoundException("Student", id);
 
     if (dto.Phone is not null && student.User is not null)
-      student.User.Update(student.User.Name, student.User.Surname, dto.Phone, student.User.Status);
+      student.User.Update(
+        student.User.Name,
+        student.User.Surname,
+        student.User.Email,
+        dto.Phone,
+        student.User.Status
+      );
 
     student.Update(dto.Note, Enum.Parse<Domain.Enums.UserStatus>(dto.Status, true));
     _students.Update(student);

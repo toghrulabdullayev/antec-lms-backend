@@ -13,7 +13,16 @@ public record CreateTeacherDto(
   string Status
 );
 
-public record UpdateTeacherDto(string? Phone, string? Specialization, string Status);
+public record UpdateTeacherDto(
+  string? Name,
+  string? Surname,
+  string? Email,
+  string? Password,
+  string? Phone,
+  string? Specialization,
+  string? Bio,
+  string Status
+);
 
 public record TeacherResponse(
   int Id,
@@ -21,7 +30,9 @@ public record TeacherResponse(
   string Name,
   string Surname,
   string Email,
+  string? Phone,
   string? Specialization,
+  string? Bio,
   string Status
 );
 
@@ -33,6 +44,7 @@ public record TeacherListItem(
   string Email,
   string? Phone,
   string? Specialization,
+  string? Bio,
   string Status
 );
 
