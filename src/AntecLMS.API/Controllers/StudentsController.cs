@@ -65,7 +65,16 @@ public class StudentsController : BaseApiController
     var result = await _students.DeleteAsync(id, ct);
     if (!result.IsSuccess)
       return ToResponse(result);
-    return Ok(new { message = "Tələbə uğurla silindi." });
+    return Ok(new { message = "Tələbə deaktiv edildi." });
+  }
+
+  [HttpDelete("{id:int}/hard")]
+  public async Task<IActionResult> HardDelete(int id, CancellationToken ct)
+  {
+    var result = await _students.HardDeleteAsync(id, ct);
+    if (!result.IsSuccess)
+      return ToResponse(result);
+    return Ok(new { message = "Tələbə tamamilə silindi." });
   }
 
   [HttpGet("{studentId:int}/attendances")]

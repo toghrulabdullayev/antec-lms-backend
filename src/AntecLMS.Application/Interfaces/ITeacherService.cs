@@ -15,6 +15,7 @@ public interface ITeacherService
   Task<Result<TeacherResponse>> CreateAsync(CreateTeacherDto dto, CancellationToken ct);
   Task<Result<TeacherResponse>> UpdateAsync(int id, UpdateTeacherDto dto, CancellationToken ct);
   Task<Result> DeleteAsync(int id, CancellationToken ct);
+  Task<Result> HardDeleteAsync(int id, CancellationToken ct);
   Task<Result> ChangePasswordAsync(
     int userId,
     string currentPassword,

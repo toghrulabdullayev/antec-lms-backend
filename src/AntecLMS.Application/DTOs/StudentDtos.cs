@@ -13,7 +13,16 @@ public record CreateStudentDto(
   string Status
 );
 
-public record UpdateStudentDto(string? Phone, string? Note, string Status);
+public record UpdateStudentDto(
+  string? Name,
+  string? Surname,
+  string? Email,
+  string? Password,
+  string? Phone,
+  DateOnly? BirthDate,
+  string? Note,
+  string Status
+);
 
 public record StudentResponse(
   int Id,
@@ -21,6 +30,9 @@ public record StudentResponse(
   string Name,
   string Surname,
   string Email,
+  string? Phone,
+  DateOnly? BirthDate,
+  string? Note,
   string Status
 );
 
@@ -32,6 +44,7 @@ public record StudentListItem(
   string Email,
   string? Phone,
   DateOnly? BirthDate,
+  string? Note,
   string Status,
   List<GroupRefS> Groups
 );

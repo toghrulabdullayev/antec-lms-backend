@@ -219,11 +219,29 @@ public class TeacherService : ITeacherService
   public async Task<Result> DeleteAsync(int id, CancellationToken ct)
   {
     var teacher =
-      await _teachers.GetByIdAsync(id, ct) ?? throw new NotFoundException("Teacher", id);
+      await _teachers.GetAll().Include(t => t.User).FirstOrDefaultAsync(t => t.Id == id, ct)
+      ?? throw new NotFoundException("Teacher", id);
 
     if (await _groups.HasActiveGroupsForTeacherAsync(id, ct))
       return Result.Failure("Bu müəllimin aktiv qrupları var, silinə bilməz.", 400);
 
+    teacher.Update(teacher.Specialization, teacher.Bio, UserStatus.Inactive);
+    if (teacher.User is not null)
+      teacher.User.ChangeStatus(UserStatus.Inactive);
+
+    _teachers.Update(teacher);
+    await _uow.SaveChangesAsync(ct);
+    return Result.Success();
+  }
+
+  public async Task<Result> HardDeleteAsync(int id, CancellationToken ct)
+  {
+    var teacher =
+      await _teachers.GetAll().Include(t => t.User).FirstOrDefaultAsync(t => t.Id == id, ct)
+      ?? throw new NotFoundException("Teacher", id);
+
+    if (teacher.User is not null)
+      _users.Remove(teacher.User);
     _teachers.Remove(teacher);
     await _uow.SaveChangesAsync(ct);
     return Result.Success();

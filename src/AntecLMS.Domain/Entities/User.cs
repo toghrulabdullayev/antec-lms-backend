@@ -62,4 +62,10 @@ public class User : BaseEntity
     Password = hashedPassword;
     MarkUpdated();
   }
+
+  public void ChangeRole(UserRole role)
+  {
+    Role = role;
+    MarkUpdated();
+  }
 }

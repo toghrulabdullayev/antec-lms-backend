@@ -57,6 +57,7 @@ public class StudentService : IStudentService
         s.User.Email,
         s.User.Phone,
         s.BirthDate,
+        s.Note,
         s.Status.ToString().ToLower(),
         s.GroupStudents.Select(gs => new GroupRefS(gs.Group.Id, gs.Group.Name)).ToList()
       ))
@@ -129,6 +130,9 @@ public class StudentService : IStudentService
         user.Name,
         user.Surname,
         user.Email,
+        user.Phone,
+        student.BirthDate,
+        student.Note,
         student.Status.ToString().ToLower()
       ),
       201
@@ -145,16 +149,29 @@ public class StudentService : IStudentService
       await _students.GetAll().Include(s => s.User).FirstOrDefaultAsync(s => s.Id == id, ct)
       ?? throw new NotFoundException("Student", id);
 
-    if (dto.Phone is not null && student.User is not null)
-      student.User.Update(
-        student.User.Name,
-        student.User.Surname,
-        student.User.Email,
-        dto.Phone,
-        student.User.Status
-      );
+    if (student.User is not null)
+    {
+      var name = dto.Name ?? student.User.Name;
+      var surname = dto.Surname ?? student.User.Surname;
+      var email = dto.Email ?? student.User.Email;
+      var phone = dto.Phone ?? student.User.Phone;
+      var userStatus = Enum.Parse<UserStatus>(dto.Status, true);
 
-    student.Update(dto.Note, Enum.Parse<Domain.Enums.UserStatus>(dto.Status, true));
+      if (
+        dto.Email is not null
+        && dto.Email != student.User.Email
+        && await _users.EmailExistsAsync(dto.Email, ct)
+      )
+        return Result<StudentResponse>.Failure("Bu email artıq mövcuddur.", 422);
+
+      student.User.Update(name, surname, email, phone, userStatus);
+
+      if (!string.IsNullOrWhiteSpace(dto.Password))
+        student.User.ChangePassword(_hasher.Hash(dto.Password));
+    }
+
+    var studentStatus = Enum.Parse<UserStatus>(dto.Status, true);
+    student.Update(dto.Note, studentStatus, dto.BirthDate);
     _students.Update(student);
     await _uow.SaveChangesAsync(ct);
 
@@ -165,6 +182,9 @@ public class StudentService : IStudentService
         student.User?.Name ?? "",
         student.User?.Surname ?? "",
         student.User?.Email ?? "",
+        student.User?.Phone,
+        student.BirthDate,
+        student.Note,
         student.Status.ToString().ToLower()
       )
     );
@@ -173,7 +193,24 @@ public class StudentService : IStudentService
   public async Task<Result> DeleteAsync(int id, CancellationToken ct)
   {
     var student =
-      await _students.GetByIdAsync(id, ct) ?? throw new NotFoundException("Student", id);
+      await _students.GetWithUserAsync(id, ct) ?? throw new NotFoundException("Student", id);
+
+    student.Update(student.Note, UserStatus.Inactive, student.BirthDate);
+    if (student.User is not null)
+      student.User.ChangeStatus(UserStatus.Inactive);
+
+    _students.Update(student);
+    await _uow.SaveChangesAsync(ct);
+    return Result.Success();
+  }
+
+  public async Task<Result> HardDeleteAsync(int id, CancellationToken ct)
+  {
+    var student =
+      await _students.GetWithUserAsync(id, ct) ?? throw new NotFoundException("Student", id);
+
+    if (student.User is not null)
+      _users.Remove(student.User);
     _students.Remove(student);
     await _uow.SaveChangesAsync(ct);
     return Result.Success();
