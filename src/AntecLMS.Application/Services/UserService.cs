@@ -133,7 +133,13 @@ public class UserService : IUserService
   {
     var user = await _users.GetByIdAsync(id, ct) ?? throw new NotFoundException("User", id);
 
-    user.Update(dto.Name, dto.Surname, dto.Phone, Enum.Parse<UserStatus>(dto.Status, true));
+    user.Update(
+      dto.Name,
+      dto.Surname,
+      user.Email,
+      dto.Phone,
+      Enum.Parse<UserStatus>(dto.Status, true)
+    );
     _users.Update(user);
     await _uow.SaveChangesAsync(ct);
 

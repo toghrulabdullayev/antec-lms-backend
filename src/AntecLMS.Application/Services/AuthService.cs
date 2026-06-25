@@ -2,6 +2,8 @@ using AntecLMS.Application.Common.Exceptions;
 using AntecLMS.Application.Common.Interfaces;
 using AntecLMS.Application.Common.Models;
 using AntecLMS.Application.DTOs;
+using AntecLMS.Domain.Entities;
+using AntecLMS.Domain.Enums;
 using AntecLMS.Domain.Repositories;
 
 namespace AntecLMS.Application.Services;
@@ -32,6 +34,9 @@ public class AuthService : IAuthService
 
     if (user is null || !_hasher.Verify(dto.Password, user.Password))
       return Result<LoginResponse>.Failure("Email veya sifre yanlisdir.", 401);
+
+    if (user.Status == UserStatus.Inactive)
+      return Result<LoginResponse>.Failure("Hesabınız deaktiv edilib.", 403);
 
     var token = _jwt.GenerateToken(user);
 

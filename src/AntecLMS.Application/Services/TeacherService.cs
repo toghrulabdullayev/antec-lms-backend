@@ -49,6 +49,7 @@ public class TeacherService : ITeacherService
         t.User.Email,
         t.User.Phone,
         t.Specialization,
+        t.Bio,
         t.Status.ToString().ToLower()
       ))
       .ToList();
@@ -155,7 +156,9 @@ public class TeacherService : ITeacherService
         user.Name,
         user.Surname,
         user.Email,
+        user.Phone,
         teacher.Specialization,
+        teacher.Bio,
         teacher.Status.ToString().ToLower()
       ),
       201
@@ -172,14 +175,29 @@ public class TeacherService : ITeacherService
       await _teachers.GetAll().Include(t => t.User).FirstOrDefaultAsync(t => t.Id == id, ct)
       ?? throw new NotFoundException("Teacher", id);
 
-    if (dto.Phone is not null && teacher.User is not null)
-      teacher.User.Update(teacher.User.Name, teacher.User.Surname, dto.Phone, teacher.User.Status);
+    if (teacher.User is not null)
+    {
+      var name = dto.Name ?? teacher.User.Name;
+      var surname = dto.Surname ?? teacher.User.Surname;
+      var email = dto.Email ?? teacher.User.Email;
+      var phone = dto.Phone ?? teacher.User.Phone;
+      var userStatus = Enum.Parse<UserStatus>(dto.Status, true);
 
-    teacher.Update(
-      dto.Specialization,
-      teacher.Bio,
-      Enum.Parse<Domain.Enums.UserStatus>(dto.Status, true)
-    );
+      if (
+        dto.Email is not null
+        && dto.Email != teacher.User.Email
+        && await _users.EmailExistsAsync(dto.Email, ct)
+      )
+        return Result<TeacherResponse>.Failure("Bu email artıq mövcuddur.", 422);
+
+      teacher.User.Update(name, surname, email, phone, userStatus);
+
+      if (!string.IsNullOrWhiteSpace(dto.Password))
+        teacher.User.ChangePassword(_hasher.Hash(dto.Password));
+    }
+
+    var bio = dto.Bio ?? teacher.Bio;
+    teacher.Update(dto.Specialization, bio, Enum.Parse<Domain.Enums.UserStatus>(dto.Status, true));
     _teachers.Update(teacher);
     await _uow.SaveChangesAsync(ct);
 
@@ -190,7 +208,9 @@ public class TeacherService : ITeacherService
         teacher.User?.Name ?? "",
         teacher.User?.Surname ?? "",
         teacher.User?.Email ?? "",
+        teacher.User?.Phone,
         teacher.Specialization,
+        teacher.Bio,
         teacher.Status.ToString().ToLower()
       )
     );
@@ -199,11 +219,29 @@ public class TeacherService : ITeacherService
   public async Task<Result> DeleteAsync(int id, CancellationToken ct)
   {
     var teacher =
-      await _teachers.GetByIdAsync(id, ct) ?? throw new NotFoundException("Teacher", id);
+      await _teachers.GetAll().Include(t => t.User).FirstOrDefaultAsync(t => t.Id == id, ct)
+      ?? throw new NotFoundException("Teacher", id);
 
     if (await _groups.HasActiveGroupsForTeacherAsync(id, ct))
       return Result.Failure("Bu müəllimin aktiv qrupları var, silinə bilməz.", 400);
 
+    teacher.Update(teacher.Specialization, teacher.Bio, UserStatus.Inactive);
+    if (teacher.User is not null)
+      teacher.User.ChangeStatus(UserStatus.Inactive);
+
+    _teachers.Update(teacher);
+    await _uow.SaveChangesAsync(ct);
+    return Result.Success();
+  }
+
+  public async Task<Result> HardDeleteAsync(int id, CancellationToken ct)
+  {
+    var teacher =
+      await _teachers.GetAll().Include(t => t.User).FirstOrDefaultAsync(t => t.Id == id, ct)
+      ?? throw new NotFoundException("Teacher", id);
+
+    if (teacher.User is not null)
+      _users.Remove(teacher.User);
     _teachers.Remove(teacher);
     await _uow.SaveChangesAsync(ct);
     return Result.Success();

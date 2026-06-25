@@ -39,10 +39,20 @@ public class Group : BaseEntity
       Status = status,
     };
 
-  public void Update(string name, int teacherId, GroupStatus status)
+  public void Update(
+    string name,
+    int courseId,
+    int teacherId,
+    DateOnly startDate,
+    DateOnly? endDate,
+    GroupStatus status
+  )
   {
     Name = name;
+    CourseId = courseId;
     TeacherId = teacherId;
+    StartDate = startDate;
+    EndDate = endDate;
     Status = status;
     MarkUpdated();
   }
