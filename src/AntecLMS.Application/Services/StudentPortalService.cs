@@ -80,13 +80,22 @@ public class StudentPortalService : IStudentPortalService
       Late: attendances.Count(a => a.Status == AttendanceStatus.Late)
     );
 
-    var labAvg = grades.Where(g => g.Category == GradeCategory.Lab).Average(g => (double)g.Score);
-    var modulAvg = grades
-      .Where(g => g.Category == GradeCategory.Modul)
-      .Average(g => (double)g.Score);
-    var final = grades.FirstOrDefault(g => g.Category == GradeCategory.Final)?.Score ?? 0;
+   
+    // 1. Lab və Modul ortalamalarını alırıq
+    double? labAvg = grades.Where(g => g.Category == GradeCategory.Lab)
+                           .Select(g => (double?)g.Score)
+                           .Average();
 
-    double finalGrade = ((0.5 * labAvg + 0.5 * modulAvg) * 0.6) + (final * 0.4);
+    double? modulAvg = grades.Where(g => g.Category == GradeCategory.Modul)
+                             .Select(g => (double?)g.Score)
+                             .Average();
+
+    // 2. Final qiymətini alırıq (yoxdursa 0)
+    double final = grades.FirstOrDefault(g => g.Category == GradeCategory.Final)?.Score ?? 0;
+
+    // 3. Yekun qiyməti hesablayırıq
+    // ?? 0 operatoru - əgər orta qiymət tapılmayıbsa (null-dursa), onu 0 kimi qəbul edir.
+    double finalGrade = ((0.5 * (labAvg ?? 0) + 0.5 * (modulAvg ?? 0)) * 0.6) + (final * 0.4);
 
     bool isEligible = summary.Total > 0 && ((double)summary.Absent / summary.Total) <= 0.25;
 

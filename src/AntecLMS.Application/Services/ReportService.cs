@@ -122,25 +122,20 @@ public class ReportService : IReportService
 
     double CalcWeighted(IEnumerable<Grade> grades)
     {
-      var labGrades = grades.Where(x => x.Lesson.Type == LessonType.Lab).ToList();
-      var modulGrades = grades.Where(x => x.Lesson.Type == LessonType.Modul).ToList();
-      var finalGrades = grades.Where(x => x.Lesson.Type == LessonType.Final).ToList();
+      // StudentPortalService ilə eyni məntiq:
+      double? labAvg = grades.Where(g => g.Category == GradeCategory.Lab)
+                             .Select(g => (double?)g.Score)
+                             .Average();
 
-      var labAvg = labGrades.Any()
-        ? (double)labGrades.Sum(x => x.Score) / labGrades.Sum(x => x.MaxScore) * 100
-        : (double?)null;
-      var modulAvg = modulGrades.Any()
-        ? (double)modulGrades.Sum(x => x.Score) / modulGrades.Sum(x => x.MaxScore) * 100
-        : (double?)null;
-      var finalAvg = finalGrades.Any()
-        ? (double)finalGrades.Sum(x => x.Score) / finalGrades.Sum(x => x.MaxScore) * 100
-        : (double?)null;
+      double? modulAvg = grades.Where(g => g.Category == GradeCategory.Modul)
+                               .Select(g => (double?)g.Score)
+                               .Average();
 
-      var subtotal =
-        ((labAvg ?? 0) + (modulAvg ?? 0)) / (labAvg.HasValue && modulAvg.HasValue ? 2 : 1);
-      var weighted = subtotal * 0.6 + (finalAvg ?? 0) * 0.4;
+      double final = grades.FirstOrDefault(g => g.Category == GradeCategory.Final)?.Score ?? 0;
 
-      return Math.Round(weighted, 1);
+      double finalGrade = ((0.5 * (labAvg ?? 0) + 0.5 * (modulAvg ?? 0)) * 0.6) + (final * 0.4);
+
+      return Math.Round(finalGrade, 1);
     }
 
     var byStudent = records

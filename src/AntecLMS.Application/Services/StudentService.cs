@@ -38,6 +38,12 @@ public class StudentService : IStudentService
     CancellationToken ct
   )
   {
+    if (groupId is null)
+    {
+      Console.WriteLine("null gelir");
+      throw new ArgumentNullException(nameof(groupId));
+    }
+
     var statusEnum = status is not null ? Enum.Parse<UserStatus>(status, true) : (UserStatus?)null;
     var (items, total) = await _students.GetPagedAsync(
       groupId,
