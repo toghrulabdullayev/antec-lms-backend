@@ -42,6 +42,7 @@ public static class DependencyInjection
     services.AddSingleton<IJwtService, JwtService>();
     services.AddScoped<ICurrentUserService, CurrentUserService>();
     services.AddScoped<IPasswordHasher, PasswordHasher>();
+    services.AddScoped<IFileStorageService, FileStorageService>();
     services.AddHttpContextAccessor();
 
     services

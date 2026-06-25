@@ -47,3 +47,20 @@ public record LessonMaterialItem(
   string? Description,
   DateTime CreatedAt
 );
+
+public record UpdateMaterialDto(
+  string Title,
+  string Type,
+  string? Url,
+  string? FilePath,
+  string? Description
+);
+
+public record CreateMaterialWithFileDto(
+  int LessonId,
+  int GroupId,
+  int TeacherId,
+  string Title,
+  string Type,
+  string? Description
+);

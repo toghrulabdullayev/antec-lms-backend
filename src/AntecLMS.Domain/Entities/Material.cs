@@ -20,6 +20,16 @@ public class Material : BaseEntity
 
   protected Material() { }
 
+  public void Update(string title, string? type, string? url, string? filePath, string? description)
+  {
+    Title = title;
+    Type = type;
+    Url = url;
+    FilePath = filePath;
+    Description = description;
+    MarkUpdated();
+  }
+
   public static Material Create(
     int lessonId,
     int groupId,

@@ -5,6 +5,7 @@ using AntecLMS.Application;
 using AntecLMS.Infrastructure;
 using AntecLMS.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -59,7 +60,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
   var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await db.Database.MigrateAsync();
+  await db.Database.MigrateAsync();
 }
 
 app.UseMiddleware<ExceptionMiddleware>();
@@ -70,6 +71,8 @@ if (app.Environment.IsDevelopment())
   app.UseSwaggerUI();
 }
 
+var webRoot = Path.Combine(app.Environment.ContentRootPath, "wwwroot");
+app.UseStaticFiles(new StaticFileOptions { FileProvider = new PhysicalFileProvider(webRoot) });
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();

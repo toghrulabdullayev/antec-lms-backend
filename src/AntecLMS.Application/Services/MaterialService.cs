@@ -1,4 +1,5 @@
 using AntecLMS.Application.Common.Exceptions;
+using AntecLMS.Application.Common.Interfaces;
 using AntecLMS.Application.Common.Models;
 using AntecLMS.Application.DTOs;
 using AntecLMS.Domain.Entities;
@@ -12,18 +13,21 @@ public class MaterialService : IMaterialService
   private readonly IMaterialRepository _materials;
   private readonly ILessonRepository _lessons;
   private readonly IGroupRepository _groups;
+  private readonly IFileStorageService _fileStorage;
   private readonly IUnitOfWork _uow;
 
   public MaterialService(
     IMaterialRepository materials,
     ILessonRepository lessons,
     IGroupRepository groups,
+    IFileStorageService fileStorage,
     IUnitOfWork uow
   )
   {
     _materials = materials;
     _lessons = lessons;
     _groups = groups;
+    _fileStorage = fileStorage;
     _uow = uow;
   }
 
@@ -126,10 +130,54 @@ public class MaterialService : IMaterialService
     );
   }
 
+  public async Task<Result<MaterialResponse>> UpdateAsync(
+    int id,
+    UpdateMaterialDto dto,
+    CancellationToken ct
+  )
+  {
+    var material =
+      await _materials.GetByIdAsync(id, ct) ?? throw new NotFoundException("Material", id);
+
+    var oldFilePath = material.FilePath;
+    var newFilePath = dto.FilePath ?? material.FilePath;
+
+    material.Update(dto.Title, dto.Type, dto.Url, newFilePath, dto.Description);
+
+    if (
+      dto.FilePath is not null
+      && !string.IsNullOrEmpty(oldFilePath)
+      && oldFilePath != dto.FilePath
+    )
+      await _fileStorage.DeleteFileAsync(oldFilePath, ct);
+
+    _materials.Update(material);
+    await _uow.SaveChangesAsync(ct);
+
+    return Result<MaterialResponse>.Success(
+      new MaterialResponse(
+        material.Id,
+        material.LessonId,
+        material.GroupId,
+        material.TeacherId,
+        material.Title,
+        material.Type ?? "",
+        material.Url,
+        material.FilePath,
+        material.Description,
+        material.CreatedAt
+      )
+    );
+  }
+
   public async Task<Result> DeleteAsync(int id, CancellationToken ct)
   {
     var material =
       await _materials.GetByIdAsync(id, ct) ?? throw new NotFoundException("Material", id);
+
+    if (!string.IsNullOrEmpty(material.FilePath))
+      await _fileStorage.DeleteFileAsync(material.FilePath, ct);
+
     _materials.Remove(material);
     await _uow.SaveChangesAsync(ct);
     return Result.Success();

@@ -80,15 +80,16 @@ public class StudentPortalService : IStudentPortalService
       Late: attendances.Count(a => a.Status == AttendanceStatus.Late)
     );
 
-   
     // 1. Lab və Modul ortalamalarını alırıq
-    double? labAvg = grades.Where(g => g.Category == GradeCategory.Lab)
-                           .Select(g => (double?)g.Score)
-                           .Average();
+    double? labAvg = grades
+      .Where(g => g.Category == GradeCategory.Lab)
+      .Select(g => (double?)g.Score)
+      .Average();
 
-    double? modulAvg = grades.Where(g => g.Category == GradeCategory.Modul)
-                             .Select(g => (double?)g.Score)
-                             .Average();
+    double? modulAvg = grades
+      .Where(g => g.Category == GradeCategory.Modul)
+      .Select(g => (double?)g.Score)
+      .Average();
 
     // 2. Final qiymətini alırıq (yoxdursa 0)
     double final = grades.FirstOrDefault(g => g.Category == GradeCategory.Final)?.Score ?? 0;

@@ -123,13 +123,15 @@ public class ReportService : IReportService
     double CalcWeighted(IEnumerable<Grade> grades)
     {
       // StudentPortalService ilə eyni məntiq:
-      double? labAvg = grades.Where(g => g.Category == GradeCategory.Lab)
-                             .Select(g => (double?)g.Score)
-                             .Average();
+      double? labAvg = grades
+        .Where(g => g.Category == GradeCategory.Lab)
+        .Select(g => (double?)g.Score)
+        .Average();
 
-      double? modulAvg = grades.Where(g => g.Category == GradeCategory.Modul)
-                               .Select(g => (double?)g.Score)
-                               .Average();
+      double? modulAvg = grades
+        .Where(g => g.Category == GradeCategory.Modul)
+        .Select(g => (double?)g.Score)
+        .Average();
 
       double final = grades.FirstOrDefault(g => g.Category == GradeCategory.Final)?.Score ?? 0;
 

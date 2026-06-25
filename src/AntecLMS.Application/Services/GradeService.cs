@@ -37,7 +37,7 @@ public class GradeService : IGradeService
       .Select(g => new MyGradeItem(
         g.Id,
         g.Lesson?.Topic ?? "",
-        g.CreatedAt,
+        g.Lesson!.LessonDate,
         g.Score,
         g.MaxScore,
         g.TeacherNote
@@ -136,10 +136,5 @@ public class GradeService : IGradeService
     _grades.Remove(grade);
     await _uow.SaveChangesAsync(ct);
     return Result.Success();
-  }
-
-  Task<Result<List<MyGradeItem>>> IGradeService.GetByLessonAsync(int lessonId, CancellationToken ct)
-  {
-    throw new NotImplementedException();
   }
 }
