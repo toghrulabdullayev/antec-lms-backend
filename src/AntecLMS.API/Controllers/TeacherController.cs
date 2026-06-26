@@ -27,6 +27,13 @@ public class TeacherController(
     return ToResponse(result);
   }
 
+  [HttpGet("schedule/{teacherId:int}")]
+  public async Task<IActionResult> WeeklySchedule(int teacherId, CancellationToken ct)
+  {
+    var result = await dashboard.GetWeeklyScheduleAsync(teacherId, ct);
+    return ToResponse(result);
+  }
+
   [HttpGet]
   public async Task<IActionResult> GetAll(
     [FromQuery] int page = 1,
