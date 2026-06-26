@@ -6,6 +6,8 @@ public record TeacherDashboardResponse(
   int UpcomingLessons,
   int RecentMaterials,
   int PendingGrades,
+  int WeeklyLessonsCompleted,
+  int WeeklyLessonsTotal,
   List<TeacherGroupItem> RecentGroups,
   List<TeacherLessonItem> RecentLessons
 );
