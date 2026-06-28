@@ -128,6 +128,7 @@ public class StudentPortalService : IStudentPortalService
             m.Title,
             m.Description,
             m.Type ?? "",
+            m.Url,
             m.FilePath
           ))
           .ToList()
