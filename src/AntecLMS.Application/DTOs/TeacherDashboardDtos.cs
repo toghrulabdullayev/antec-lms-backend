@@ -9,7 +9,8 @@ public record TeacherDashboardResponse(
   int WeeklyLessonsCompleted,
   int WeeklyLessonsTotal,
   List<TeacherGroupItem> RecentGroups,
-  List<TeacherLessonItem> RecentLessons
+  List<TeacherLessonItem> RecentLessons,
+  List<WeeklyScheduleItem> WeeklySchedule
 );
 
 public record TeacherGroupItem(int Id, string? Name, int StudentCount);

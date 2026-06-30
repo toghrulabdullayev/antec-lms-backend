@@ -18,6 +18,7 @@ public class AppDbContext : DbContext
   public DbSet<Grade> Grades => Set<Grade>();
   public DbSet<Lesson> Lessons => Set<Lesson>();
   public DbSet<Material> Materials => Set<Material>();
+  public DbSet<GroupSchedule> GroupSchedules => Set<GroupSchedule>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {

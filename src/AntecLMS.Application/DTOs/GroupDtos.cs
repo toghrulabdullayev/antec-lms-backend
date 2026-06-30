@@ -2,13 +2,16 @@ using AntecLMS.Application.Common.Models;
 
 namespace AntecLMS.Application.DTOs;
 
+public record GroupScheduleItem(string DayOfWeek, string StartTime, string EndTime, string? RoomOrNote);
+
 public record CreateGroupDto(
   string Name,
   int CourseId,
   int TeacherId,
   DateOnly StartDate,
   DateOnly? EndDate,
-  string Status
+  string Status,
+  List<GroupScheduleItem>? Schedules
 );
 
 public record UpdateGroupDto(
@@ -17,7 +20,8 @@ public record UpdateGroupDto(
   int TeacherId,
   DateOnly StartDate,
   DateOnly? EndDate,
-  string Status
+  string Status,
+  List<GroupScheduleItem>? Schedules
 );
 
 public record GroupResponse(
@@ -53,7 +57,8 @@ public record GroupDetailResponse(
   DateOnly? EndDate,
   string Status,
   List<StudentInGroup> Students,
-  int StudentsCount
+  int StudentsCount,
+  List<GroupScheduleItem> Schedules
 );
 
 public record CourseInfo(int Id, string Name);

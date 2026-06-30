@@ -1,11 +1,10 @@
 namespace AntecLMS.Application.DTOs;
 
 public record WeeklyScheduleItem(
-  int LessonId,
   int GroupId,
   string GroupName,
-  string Topic,
-  DateTime LessonDate,
-  int DayOfWeekIndex,
-  int Hour
+  string DayOfWeek,
+  string StartTime,
+  string EndTime,
+  string? RoomOrNote
 );

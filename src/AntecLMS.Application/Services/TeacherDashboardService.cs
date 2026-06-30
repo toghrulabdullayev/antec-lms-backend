@@ -14,13 +14,15 @@ public class TeacherDashboardService : ITeacherDashboardService
   private readonly ILessonRepository _lessons;
   private readonly IMaterialRepository _materials;
   private readonly IGradeRepository _grades;
+  private readonly IGroupScheduleRepository _schedules;
 
   public TeacherDashboardService(
     ITeacherRepository teachers,
     IGroupRepository groups,
     ILessonRepository lessons,
     IMaterialRepository materials,
-    IGradeRepository grades
+    IGradeRepository grades,
+    IGroupScheduleRepository schedules
   )
   {
     _teachers = teachers;
@@ -28,6 +30,7 @@ public class TeacherDashboardService : ITeacherDashboardService
     _lessons = lessons;
     _materials = materials;
     _grades = grades;
+    _schedules = schedules;
   }
 
   public async Task<Result<TeacherDashboardResponse>> GetAsync(int teacherId, CancellationToken ct)
@@ -93,6 +96,17 @@ public class TeacherDashboardService : ITeacherDashboardService
       ))
       .ToList();
 
+    var weeklySchedule = (await _schedules.GetByTeacherAsync(teacherId, ct))
+      .Select(s => new WeeklyScheduleItem(
+        s.GroupId,
+        s.Group.Name,
+        s.DayOfWeek.ToString(),
+        s.StartTime.ToString(),
+        s.EndTime.ToString(),
+        s.RoomOrNote
+      ))
+      .ToList();
+
     return Result<TeacherDashboardResponse>.Success(
       new TeacherDashboardResponse(
         groups.Count,
@@ -103,7 +117,8 @@ public class TeacherDashboardService : ITeacherDashboardService
         weeklyCompleted,
         weeklyTotal,
         recentGroups,
-        recentLessons
+        recentLessons,
+        weeklySchedule
       )
     );
   }
@@ -114,34 +129,14 @@ public class TeacherDashboardService : ITeacherDashboardService
       await _teachers.GetByIdAsync(teacherId, ct)
       ?? throw new NotFoundException("Teacher", teacherId);
 
-    var groups = await _groups
-      .GetAll()
-      .Where(g => g.TeacherId == teacherId)
-      .ToListAsync(ct);
-
-    var groupIds = groups.Select(g => g.Id).ToList();
-
-    var now = DateTime.UtcNow;
-    var daysFromMonday = ((int)now.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
-    var weekStart = now.Date.AddDays(-daysFromMonday);
-    var weekEnd = weekStart.AddDays(7).AddTicks(-1);
-
-    var lessons = await _lessons
-      .GetAll()
-      .Where(l => groupIds.Contains(l.GroupId) && l.LessonDate >= weekStart && l.LessonDate <= weekEnd)
-      .Include(l => l.Group)
-      .OrderBy(l => l.LessonDate)
-      .ToListAsync(ct);
-
-    var items = lessons
-      .Select(l => new WeeklyScheduleItem(
-        l.Id,
-        l.GroupId,
-        l.Group?.Name ?? "",
-        l.Topic ?? "",
-        l.LessonDate,
-        ((int)l.LessonDate.DayOfWeek - 1 + 7) % 7,
-        l.LessonDate.Hour
+    var items = (await _schedules.GetByTeacherAsync(teacherId, ct))
+      .Select(s => new WeeklyScheduleItem(
+        s.GroupId,
+        s.Group.Name,
+        s.DayOfWeek.ToString(),
+        s.StartTime.ToString(),
+        s.EndTime.ToString(),
+        s.RoomOrNote
       ))
       .ToList();
 

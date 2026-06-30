@@ -19,4 +19,5 @@ public interface IGroupService
   Task<Result> DeleteAsync(int id, CancellationToken ct);
   Task<Result> AddStudentAsync(int groupId, int studentId, CancellationToken ct);
   Task<Result> RemoveStudentAsync(int groupId, int studentId, CancellationToken ct);
+  Task<Result<List<GroupScheduleItem>>> GetScheduleAsync(int groupId, CancellationToken ct);
 }
