@@ -94,8 +94,8 @@ public class GroupService : IGroupService
     var scheduleItems = (await _schedules.GetByGroupAsync(id, ct))
       .Select(s => new GroupScheduleItem(
         s.DayOfWeek.ToString(),
-        s.StartTime.ToString(),
-        s.EndTime.ToString(),
+        s.StartTime.ToString("HH:mm"),
+        s.EndTime.ToString("HH:mm"),
         s.RoomOrNote
       ))
       .ToList();
@@ -285,8 +285,8 @@ public class GroupService : IGroupService
     var items = (await _schedules.GetByGroupAsync(groupId, ct))
       .Select(s => new GroupScheduleItem(
         s.DayOfWeek.ToString(),
-        s.StartTime.ToString(),
-        s.EndTime.ToString(),
+        s.StartTime.ToString("HH:mm"),
+        s.EndTime.ToString("HH:mm"),
         s.RoomOrNote
       ))
       .ToList();
