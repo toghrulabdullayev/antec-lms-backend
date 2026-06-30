@@ -142,13 +142,19 @@ public class GroupService : IGroupService
     {
       foreach (var s in dto.Schedules)
       {
-        var schedule = GroupSchedule.Create(
-          group.Id,
-          Enum.Parse<DayOfWeek>(s.DayOfWeek, true),
-          TimeOnly.Parse(s.StartTime),
-          TimeOnly.Parse(s.EndTime),
-          s.RoomOrNote
-        );
+        if (!Enum.TryParse<DayOfWeek>(s.DayOfWeek, true, out var day))
+          return Result<GroupResponse>.Failure($"Yanlış gün formatı: '{s.DayOfWeek}'", 400);
+
+        if (!TimeOnly.TryParse(s.StartTime, out var start))
+          return Result<GroupResponse>.Failure($"Yanlış başlama vaxtı formatı: '{s.StartTime}'", 400);
+
+        if (!TimeOnly.TryParse(s.EndTime, out var end))
+          return Result<GroupResponse>.Failure($"Yanlış bitmə vaxtı formatı: '{s.EndTime}'", 400);
+
+        if (end <= start)
+          return Result<GroupResponse>.Failure("Bitmə vaxtı başlama vaxtından sonra olmalıdır.", 400);
+
+        var schedule = GroupSchedule.Create(group.Id, day, start, end, s.RoomOrNote);
         await _schedules.AddAsync(schedule, ct);
       }
     }
@@ -191,15 +197,23 @@ public class GroupService : IGroupService
 
     if (dto.Schedules != null)
     {
-      var newSchedules = dto.Schedules
-        .Select(s => GroupSchedule.Create(
-          group.Id,
-          Enum.Parse<DayOfWeek>(s.DayOfWeek, true),
-          TimeOnly.Parse(s.StartTime),
-          TimeOnly.Parse(s.EndTime),
-          s.RoomOrNote
-        ))
-        .ToList();
+      var newSchedules = new List<GroupSchedule>();
+      foreach (var s in dto.Schedules)
+      {
+        if (!Enum.TryParse<DayOfWeek>(s.DayOfWeek, true, out var day))
+          return Result<GroupResponse>.Failure($"Yanlış gün formatı: '{s.DayOfWeek}'", 400);
+
+        if (!TimeOnly.TryParse(s.StartTime, out var start))
+          return Result<GroupResponse>.Failure($"Yanlış başlama vaxtı formatı: '{s.StartTime}'", 400);
+
+        if (!TimeOnly.TryParse(s.EndTime, out var end))
+          return Result<GroupResponse>.Failure($"Yanlış bitmə vaxtı formatı: '{s.EndTime}'", 400);
+
+        if (end <= start)
+          return Result<GroupResponse>.Failure("Bitmə vaxtı başlama vaxtından sonra olmalıdır.", 400);
+
+        newSchedules.Add(GroupSchedule.Create(group.Id, day, start, end, s.RoomOrNote));
+      }
 
       await _schedules.ReplaceForGroupAsync(group.Id, newSchedules, ct);
     }
