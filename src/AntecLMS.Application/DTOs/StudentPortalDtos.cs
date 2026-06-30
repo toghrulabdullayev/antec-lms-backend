@@ -33,6 +33,7 @@ public record MyMaterialRef(
   string Title,
   string? Description,
   string Type,
+  string? Url,
   string? FilePath
 );
 

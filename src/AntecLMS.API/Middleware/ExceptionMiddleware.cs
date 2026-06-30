@@ -9,11 +9,13 @@ public class ExceptionMiddleware
 {
   private readonly RequestDelegate _next;
   private readonly ILogger<ExceptionMiddleware> _logger;
+  private readonly IWebHostEnvironment _env;
 
-  public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
+  public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IWebHostEnvironment env)
   {
     _next = next;
     _logger = logger;
+    _env = env;
   }
 
   public async Task InvokeAsync(HttpContext context)
@@ -29,7 +31,7 @@ public class ExceptionMiddleware
     }
   }
 
-  private static Task HandleExceptionAsync(HttpContext context, Exception ex)
+  private Task HandleExceptionAsync(HttpContext context, Exception ex)
   {
     context.Response.ContentType = "application/json";
 
@@ -62,7 +64,9 @@ public class ExceptionMiddleware
 
       default:
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-        response = new { message = "Daxili server xətası." };
+        response = _env.IsDevelopment()
+          ? new { message = "Daxili server xətası.", detail = ex.Message, stack = ex.StackTrace }
+          : new { message = "Daxili server xətası." };
         break;
     }
 

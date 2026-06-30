@@ -16,6 +16,7 @@ public class Group : BaseEntity
   public Course Course { get; set; } = default!;
   public Teacher Teacher { get; set; } = default!;
   public ICollection<GroupStudent> GroupStudents { get; set; } = new List<GroupStudent>();
+  public ICollection<GroupSchedule> Schedules { get; set; } = new List<GroupSchedule>();
   public ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
   public ICollection<Material> Materials { get; set; } = new List<Material>();
 

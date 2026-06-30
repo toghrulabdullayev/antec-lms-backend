@@ -91,4 +91,11 @@ public class GroupsController : BaseApiController
       return ToResponse(result);
     return Ok(new { message = "Tələbə qrupdan uğurla çıxarıldı." });
   }
+
+  [HttpGet("{id:int}/schedule")]
+  public async Task<IActionResult> GetSchedule(int id, CancellationToken ct)
+  {
+    var result = await _groups.GetScheduleAsync(id, ct);
+    return ToResponse(result);
+  }
 }

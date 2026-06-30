@@ -37,6 +37,7 @@ public static class DependencyInjection
     services.AddScoped<IGradeRepository, GradeRepository>();
     services.AddScoped<ILessonRepository, LessonRepository>();
     services.AddScoped<IMaterialRepository, MaterialRepository>();
+    services.AddScoped<IGroupScheduleRepository, GroupScheduleRepository>();
     services.AddScoped<IUnitOfWork, UnitOfWork>();
 
     services.AddSingleton<IJwtService, JwtService>();

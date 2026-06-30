@@ -13,6 +13,7 @@ public class GroupService : IGroupService
   private readonly ICourseRepository _courses;
   private readonly ITeacherRepository _teachers;
   private readonly IStudentRepository _students;
+  private readonly IGroupScheduleRepository _schedules;
   private readonly IUnitOfWork _uow;
 
   public GroupService(
@@ -20,6 +21,7 @@ public class GroupService : IGroupService
     ICourseRepository courses,
     ITeacherRepository teachers,
     IStudentRepository students,
+    IGroupScheduleRepository schedules,
     IUnitOfWork uow
   )
   {
@@ -27,6 +29,7 @@ public class GroupService : IGroupService
     _courses = courses;
     _teachers = teachers;
     _students = students;
+    _schedules = schedules;
     _uow = uow;
   }
 
@@ -88,6 +91,15 @@ public class GroupService : IGroupService
       ))
       .ToList();
 
+    var scheduleItems = (await _schedules.GetByGroupAsync(id, ct))
+      .Select(s => new GroupScheduleItem(
+        s.DayOfWeek.ToString(),
+        s.StartTime.ToString("HH:mm"),
+        s.EndTime.ToString("HH:mm"),
+        s.RoomOrNote
+      ))
+      .ToList();
+
     return Result<GroupDetailResponse>.Success(
       new GroupDetailResponse(
         group.Id,
@@ -98,7 +110,8 @@ public class GroupService : IGroupService
         group.EndDate,
         group.Status.ToString().ToLower(),
         students,
-        students.Count
+        students.Count,
+        scheduleItems
       )
     );
   }
@@ -124,6 +137,28 @@ public class GroupService : IGroupService
     );
 
     await _groups.AddAsync(group, ct);
+
+    if (dto.Schedules != null)
+    {
+      foreach (var s in dto.Schedules)
+      {
+        if (!Enum.TryParse<DayOfWeek>(s.DayOfWeek, true, out var day))
+          return Result<GroupResponse>.Failure($"Yanlış gün formatı: '{s.DayOfWeek}'", 400);
+
+        if (!TimeOnly.TryParse(s.StartTime, out var start))
+          return Result<GroupResponse>.Failure($"Yanlış başlama vaxtı formatı: '{s.StartTime}'", 400);
+
+        if (!TimeOnly.TryParse(s.EndTime, out var end))
+          return Result<GroupResponse>.Failure($"Yanlış bitmə vaxtı formatı: '{s.EndTime}'", 400);
+
+        if (end <= start)
+          return Result<GroupResponse>.Failure("Bitmə vaxtı başlama vaxtından sonra olmalıdır.", 400);
+
+        var schedule = GroupSchedule.Create(group.Id, day, start, end, s.RoomOrNote);
+        await _schedules.AddAsync(schedule, ct);
+      }
+    }
+
     await _uow.SaveChangesAsync(ct);
 
     return Result<GroupResponse>.Success(
@@ -159,6 +194,30 @@ public class GroupService : IGroupService
     group.Update(dto.Name, dto.CourseId, dto.TeacherId, dto.StartDate, dto.EndDate, status);
 
     _groups.Update(group);
+
+    if (dto.Schedules != null)
+    {
+      var newSchedules = new List<GroupSchedule>();
+      foreach (var s in dto.Schedules)
+      {
+        if (!Enum.TryParse<DayOfWeek>(s.DayOfWeek, true, out var day))
+          return Result<GroupResponse>.Failure($"Yanlış gün formatı: '{s.DayOfWeek}'", 400);
+
+        if (!TimeOnly.TryParse(s.StartTime, out var start))
+          return Result<GroupResponse>.Failure($"Yanlış başlama vaxtı formatı: '{s.StartTime}'", 400);
+
+        if (!TimeOnly.TryParse(s.EndTime, out var end))
+          return Result<GroupResponse>.Failure($"Yanlış bitmə vaxtı formatı: '{s.EndTime}'", 400);
+
+        if (end <= start)
+          return Result<GroupResponse>.Failure("Bitmə vaxtı başlama vaxtından sonra olmalıdır.", 400);
+
+        newSchedules.Add(GroupSchedule.Create(group.Id, day, start, end, s.RoomOrNote));
+      }
+
+      await _schedules.ReplaceForGroupAsync(group.Id, newSchedules, ct);
+    }
+
     await _uow.SaveChangesAsync(ct);
 
     return Result<GroupResponse>.Success(
@@ -217,5 +276,21 @@ public class GroupService : IGroupService
     gs.Status = UserStatus.Inactive;
     await _uow.SaveChangesAsync(ct);
     return Result.Success();
+  }
+
+  public async Task<Result<List<GroupScheduleItem>>> GetScheduleAsync(int groupId, CancellationToken ct)
+  {
+    _ = await _groups.GetByIdAsync(groupId, ct) ?? throw new NotFoundException("Group", groupId);
+
+    var items = (await _schedules.GetByGroupAsync(groupId, ct))
+      .Select(s => new GroupScheduleItem(
+        s.DayOfWeek.ToString(),
+        s.StartTime.ToString("HH:mm"),
+        s.EndTime.ToString("HH:mm"),
+        s.RoomOrNote
+      ))
+      .ToList();
+
+    return Result<List<GroupScheduleItem>>.Success(items);
   }
 }
